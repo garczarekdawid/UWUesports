@@ -1,0 +1,16 @@
+﻿@model List<UWUesports.Web.Models.Player>
+
+
+<ul>
+    @foreach (var player in Model)
+    {
+        <li>@player.Nickname
+            <ul>
+                @foreach(var tm in player.TeamPlayers)
+                {
+                    <li>@tm.Team.Name</li>
+                }
+            </ul>
+        </li>
+    }
+</ul>
