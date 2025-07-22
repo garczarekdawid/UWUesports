@@ -19,52 +19,56 @@ namespace UWUesports.Web.Controllers
             return View();
         }
 
-        // GET
-        public async Task<IActionResult> Create()
-        {
-            var model = new AddPlayerToTeamViewModel
-            {
-                Players = await _context.Players.ToListAsync(),
-                Teams = await _context.Teams.ToListAsync()
-            };
 
-            return View(model);
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddPlayer(int teamId, int playerId)
+        {
+            if (!await _context.TeamPlayers.AnyAsync(tp => tp.TeamId == teamId && tp.UserId  == playerId))
+            {
+                _context.TeamPlayers.Add(new TeamPlayer { TeamId = teamId, UserId  = playerId });
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction("Details", "Teams", new { id = teamId });
+        }
+
+        public async Task<IActionResult> AddPlayers(int teamId, int[] playerIds)
+        {
+            if (playerIds == null || playerIds.Length == 0)
+            {
+                TempData["Error"] = "Musisz wybrać przynajmniej jednego gracza.";
+                return RedirectToAction("Details", "Teams", new { id = teamId });
+            }
+
+            var existingPlayerIds = await _context.TeamPlayers
+                .Where(tp => tp.TeamId == teamId && playerIds.Contains(tp.UserId ))
+                .Select(tp => tp.UserId )
+                .ToListAsync();
+
+            var newPlayers = playerIds.Except(existingPlayerIds)
+                .Select(pid => new TeamPlayer { TeamId = teamId, UserId  = pid });
+
+            _context.TeamPlayers.AddRange(newPlayers);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = $"Dodano {newPlayers.Count()} graczy do drużyny.";
+            return RedirectToAction("Details", "Teams", new { id = teamId });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(AddPlayerToTeamViewModel model)
+        public async Task<IActionResult> RemovePlayer(int teamId, int playerId)
         {
-            if (!ModelState.IsValid)
+            var entity = await _context.TeamPlayers
+                .FirstOrDefaultAsync(tp => tp.TeamId == teamId && tp.UserId  == playerId);
+
+            if (entity != null)
             {
-                // załaduj listy ponownie, jeśli trzeba
-                model.Teams = await _context.Teams.ToListAsync();
-                model.Players = await _context.Players.ToListAsync();
-                return View(model);
+                _context.TeamPlayers.Remove(entity);
+                await _context.SaveChangesAsync();
             }
 
-            // 🔍 sprawdzenie czy relacja już istnieje
-            bool alreadyAssigned = await _context.TeamPlayers
-                .AnyAsync(tp => tp.TeamId == model.TeamId && tp.PlayerId == model.PlayerId);
-
-            if (alreadyAssigned)
-            {
-                ModelState.AddModelError("", "Ten gracz jest już przypisany do tej drużyny.");
-                model.Teams = await _context.Teams.ToListAsync();
-                model.Players = await _context.Players.ToListAsync();
-                return View(model);
-            }
-
-            var teamPlayer = new TeamPlayer
-            {
-                TeamId = model.TeamId,
-                PlayerId = model.PlayerId
-            };
-
-            _context.TeamPlayers.Add(teamPlayer);
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction("Index", "Teams");
+            return RedirectToAction("Details", "Teams", new { id = teamId });
         }
     }
 }

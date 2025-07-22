@@ -32,27 +32,32 @@
 
                         <!-- Players Menu -->
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-dark" href="#" id="playersDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Players
+                            <a class="nav-link dropdown-toggle text-dark" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Użytkownicy
                             </a>
-                            <ul class="dropdown-menu" aria-labelledby="playersDropdown">
-                                <li><a class="dropdown-item" asp-controller="Players" asp-action="Index">Lista</a></li>
-                                <li><a class="dropdown-item" asp-controller="Players" asp-action="Create">Dodaj</a></li>
+                            <ul class="dropdown-menu" aria-labelledby="userDropdown">
+                                <li><a class="dropdown-item" asp-controller="Users" asp-action="Index">Lista</a></li>
                             </ul>
                         </li>
 
                         <!-- Teams Menu -->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle text-dark" href="#" id="teamsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Teams
+                                Drużyny
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="teamsDropdown">
                                 <li><a class="dropdown-item" asp-controller="Teams" asp-action="Index">Lista</a></li>
-                                <li><a class="dropdown-item" asp-controller="Teams" asp-action="Create">Dodaj</a></li>
                             </ul>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="TeamPlayer" asp-action="Create">Przypisz gracza</a>
+
+                        <!-- Organization Menu -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-dark" href="#" id="oragnizationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Organizacje
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="oragnizationDropdown">
+                                <li><a class="dropdown-item" asp-controller="Organization" asp-action="Index">Lista</a></li>
+                            </ul>
                         </li>
                     </ul>
                 </div>
@@ -74,6 +79,7 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

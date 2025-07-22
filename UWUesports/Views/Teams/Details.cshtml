@@ -1,0 +1,86 @@
+﻿@model UWUesports.Web.ViewModels.TeamDetailsViewModel
+
+@{
+    ViewData["Title"] = "Szczegóły drużyny";
+}
+
+@if (Model == null || Model.Team == null)
+{
+    <div class="alert alert-danger">Nie udało się załadować danych drużyny.</div>
+    return;
+}
+
+<h2>@Model.Team.Name</h2>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<h4>Gracze w drużynie @Model.Team.Name</h4>
+
+@if (Model.PlayersInTeam != null && Model.PlayersInTeam.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nickname</th>
+                <th>Akcje</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var player in Model.PlayersInTeam)
+            {
+                <tr>
+                    <td>@player.Nickname</td>
+                    <td>
+                        <form asp-action="RemovePlayer" asp-controller="TeamPlayer" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="playerId" value="@player.Id" />
+                            <input type="hidden" name="teamId" value="@Model.Team.Id" />
+                            <button type="submit" class="btn btn-danger btn-sm">Usuń</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Brak przypisanych graczy do tej drużyny.</p>
+}
+
+<hr />
+
+<h5>Dodaj gracza</h5>
+@if (Model.AvailablePlayers != null && Model.AvailablePlayers.Any())
+{
+    <form asp-action="AddPlayers" asp-controller="TeamPlayer" method="post">
+        <input type="hidden" name="teamId" value="@Model.Team.Id" />
+        <div class="form-group">
+            <label>Wybierz graczy do dodania</label>
+            <select class="form-control" name="playerIds" multiple="multiple" style="width: 100%;">
+                @foreach (var player in Model.AvailablePlayers)
+                {
+                    <option value="@player.Id">@player.Nickname</option>
+                }
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Dodaj wybranych</button>
+        @Html.AntiForgeryToken()
+    </form>
+}
+else
+{
+    <p>Wszyscy gracze są już przypisani do tej drużyny.</p>
+}
+
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script src="~/js/select2-init.js"></script>
+
+}

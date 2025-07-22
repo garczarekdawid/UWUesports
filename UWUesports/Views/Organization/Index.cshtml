@@ -1,60 +1,48 @@
-﻿@model UWUesports.Web.ViewModels.PaginatedList<UWUesports.Web.Models.Team>
+﻿@model UWUesports.Web.ViewModels.PaginatedList<UWUesports.Web.Models.Organization>
 
-<h2>Lista drużyn</h2>
+<h2>Lista organizacji</h2>
 
-<a asp-action="Create" class="btn btn-success mb-3">+ Dodaj drużynę</a>
+<a asp-action="Create" class="btn btn-success mb-3">+ Dodaj Organizację</a>
 
 <div>
     <form method="get" asp-action="Index" class="mb-3 d-inline-block me-3" id="searchForm">
         <input type="text" name="searchName" placeholder="Szukaj po nazwie" value="@ViewData["searchName"]" class="form-control d-inline-block" style="width: 200px;" />
     </form>
 </div>
+
 <table class="table table-bordered table-striped">
     <thead>
         <tr>
-            <th>Nazwa drużyny</th>
-            <th>Zawodnicy</th>
+            <th>Nazwa</th>
+            <th>Liczba drużyn</th>
             <th>Akcje</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var team in Model.Items)
+        @foreach (var org in Model.Items)
         {
             <tr>
-                <td>@team.Name</td>
+                <td>@org.Name</td>
+                <td>@(org.Teams?.Count ?? 0)</td>
                 <td>
-                    @if (team.TeamPlayers != null && team.TeamPlayers.Any())
-                    {
-                        <ul>
-                            @foreach (var tp in team.TeamPlayers)
-                            {
-                                <li>@tp.User.Nickname</li>
-                            }
-                        </ul>
-                    }
-                    else
-                    {
-                        <span>Brak zawodników</span>
-                    }
-                </td>
-                <td>
-                    <a asp-action="Details" asp-route-id="@team.Id" class="btn btn-sm btn-info me-1">Szczegóły</a>
-                    <a asp-action="Edit" asp-route-id="@team.Id" class="btn btn-sm btn-warning me-1">Edytuj</a>
-                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-@team.Id">Usuń</button>
+                    <a asp-action="Details" asp-route-id="@org.Id" class="btn btn-info btn-sm">Szczegóły</a>
+                    <a asp-action="Edit" asp-route-id="@org.Id" class="btn btn-sm btn-warning">Edytuj</a>
+                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal-@org.Id">
+                        Usuń
+                    </button>
 
-                    <!-- Modal -->
-                    <div class="modal fade" id="deleteModal-@team.Id" tabindex="-1" aria-labelledby="deleteModalLabel-@team.Id" aria-hidden="true">
+                    <div class="modal fade" id="deleteModal-@org.Id" tabindex="-1" aria-labelledby="deleteModalLabel-@org.Id" aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header">
-                                    <h5 class="modal-title" id="deleteModalLabel-@team.Id">Potwierdź usunięcie</h5>
+                                    <h5 class="modal-title" id="deleteModalLabel-@org.Id">Potwierdź usunięcie</h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
                                 </div>
                                 <div class="modal-body">
-                                    Czy na pewno chcesz usunąć drużynę <strong>@team.Name</strong>?
+                                    Czy na pewno chcesz usunąć organizację <strong>@org.Name</strong>?
                                 </div>
                                 <div class="modal-footer">
-                                    <form asp-action="DeleteConfirmed" asp-route-id="@team.Id" method="post">
+                                    <form asp-action="DeleteConfirmed" asp-route-id="@org.Id" method="post">
                                         @Html.AntiForgeryToken()
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
                                         <button type="submit" class="btn btn-danger">Usuń</button>
@@ -73,18 +61,20 @@
     int currentPage = Model.PageNumber;
     int totalPages = Model.TotalPages;
     int pageSize = Model.PageSize;
-    int[] allowedPageSizes = (int[])ViewData["AllowedPageSizes"];
+    int[] allowedPageSizes = new[] { 5, 10, 20, 50, 100 };
 }
 
 <nav aria-label="Page navigation">
     <ul class="pagination justify-content-center align-items-center">
 
         <li class="page-item @(currentPage == 1 ? "disabled" : "")">
-            <a class="page-link" asp-action="Index" asp-route-page="@(currentPage - 1)" asp-route-pageSize="@pageSize">&lt; Poprzednia</a>
+            <a class="page-link" asp-action="Index" asp-route-page="@(currentPage - 1)" asp-route-pageSize="@pageSize" tabindex="-1">&lt; Poprzednia</a>
         </li>
 
         <li class="page-item disabled">
-            <span class="page-link">Strona @currentPage z @totalPages</span>
+            <span class="page-link">
+                Strona @currentPage z @totalPages
+            </span>
         </li>
 
         <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
@@ -93,16 +83,17 @@
 
         <li class="page-item ms-3">
             <form method="get" asp-action="Index" class="d-flex align-items-center">
-                <label for="pageInput" class="me-2 mb-0">Przejdź do:</label>
+                <label for="pageInput" class="me-2 mb-0">Przejdź do strony:</label>
                 <input type="number" min="1" max="@totalPages" value="@currentPage" name="page" id="pageInput" class="form-control form-control-sm me-2" style="width: 70px;" />
                 <input type="hidden" name="pageSize" value="@pageSize" />
+                <input type="hidden" name="searchName" value="@ViewData["searchName"]" />
                 <button type="submit" class="btn btn-primary btn-sm">Idź</button>
             </form>
         </li>
 
         <li class="page-item ms-3">
             <form method="get" asp-action="Index" class="d-flex align-items-center">
-                <label for="pageSizeSelect" class="me-2 mb-0">Na stronę:</label>
+                <label for="pageSizeSelect" class="me-2 mb-0">Liczba wierszy na stronie:</label>
                 <select name="pageSize" id="pageSizeSelect" class="form-select form-select-sm" onchange="this.form.submit()">
                     @foreach (var size in allowedPageSizes)
                     {
@@ -110,10 +101,12 @@
                     }
                 </select>
                 <input type="hidden" name="page" value="1" />
+                <input type="hidden" name="searchName" value="@ViewData["searchName"]" />
             </form>
         </li>
     </ul>
 </nav>
+
 
 @section Scripts {
     <script>

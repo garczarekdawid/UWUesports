@@ -12,6 +12,12 @@ namespace UWUesports.Web.Models
         [MinLength(3, ErrorMessage = "Nazwa musi mieć minimalnie 3 znaki.")]
         public string Name { get; set; }
 
+        // Klucz obcy do organizacji (nullable jeśli drużyna może nie mieć organizacji)
+        public int? OrganizationId { get; set; }
+
+        // Nawigacja do organizacji
+        public Organization Organization { get; set; }
+
         public List<TeamPlayer> TeamPlayers { get; set; } = new();
     }
 }

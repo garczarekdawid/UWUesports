@@ -1,0 +1,28 @@
+﻿@model UWUesports.Web.ViewModels.OrganizationDetailsViewModel
+
+<h2>@Model.Organization.Name</h2>
+
+<h3>Drużyny przypisane:</h3>
+<ul>
+    @foreach (var team in Model.Organization.Teams)
+    {
+        <li>@team.Name</li>
+    }
+</ul>
+
+<h3>Przypisz nową drużynę:</h3>
+
+<form asp-action="AssignTeam" method="post">
+    <input type="hidden" asp-for="Organization.Id" />
+
+    <select asp-for="SelectedTeamId" asp-items="@(new SelectList(Model.AvailableTeams, "Id", "Name"))">
+        <option value="">-- Wybierz drużynę --</option>
+    </select>
+    <span asp-validation-for="SelectedTeamId" class="text-danger"></span>
+
+    <button type="submit">Przypisz</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
