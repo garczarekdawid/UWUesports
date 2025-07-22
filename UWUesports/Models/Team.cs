@@ -16,7 +16,7 @@ namespace UWUesports.Web.Models
         public int? OrganizationId { get; set; }
 
         // Nawigacja do organizacji
-        public Organization Organization { get; set; }
+        public Organization? Organization { get; set; }
 
         public List<TeamPlayer> TeamPlayers { get; set; } = new();
     }
