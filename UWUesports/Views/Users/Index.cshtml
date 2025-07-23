@@ -84,7 +84,7 @@
     int currentPage = Model.PageNumber;
     int totalPages = Model.TotalPages;
     int pageSize = Model.PageSize;
-    int[] allowedPageSizes = new[] { 5, 10, 20, 50, 100 };
+    int[] allowedPageSizes = (int[])ViewData["AllowedPageSizes"];
 }
 
 <nav aria-label="Page navigation">

@@ -17,6 +17,7 @@ namespace UWUesports.Web.Controllers
 
         public async Task<IActionResult> Index(string searchEmail = "", string searchNickname = "", int page = 1, int pageSize = 5)
         {
+            int[] allowedPageSizes = new[] { 5, 10, 20, 50, 100 };
             var query = _context.Users
                     .Include(u => u.TeamPlayers)
                         .ThenInclude(tp => tp.Team)
@@ -31,6 +32,7 @@ namespace UWUesports.Web.Controllers
 
             ViewData["searchEmail"] = searchEmail;
             ViewData["searchNickname"] = searchNickname;
+            ViewData["AllowedPageSizes"] = allowedPageSizes;
 
             return View(model);
         }

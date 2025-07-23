@@ -31,6 +31,9 @@ namespace UWUesports.Web.Controllers
             if (!string.IsNullOrEmpty(searchName))
                 query = query.Where(o => o.Name.ToLower().Contains(searchName.ToLower()));
 
+            ViewData["AllowedPageSizes"] = allowedPageSizes;
+            ViewData["searchName"] = searchName;
+
             var model = await PaginatedList<Organization>.CreateAsync(query, page, pageSize);
 
             return View(model);
@@ -69,7 +72,7 @@ namespace UWUesports.Web.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!OrganizationExists(organization.Id))
+                    if (!_context.Organizations.Any(o => o.Id == organization.Id))
                         return NotFound();
                     else
                         throw;
@@ -113,17 +116,9 @@ namespace UWUesports.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private bool OrganizationExists(int id)
-        {
-            return _context.Organizations.Any(o => o.Id == id);
-        }
-
         // GET: Organization/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int id)
         {
-            if (id == null)
-                return NotFound();
-
             var organization = await _context.Organizations
                 .Include(o => o.Teams)
                 .FirstOrDefaultAsync(o => o.Id == id);
@@ -135,47 +130,65 @@ namespace UWUesports.Web.Controllers
                 .Where(t => t.OrganizationId == null)
                 .ToListAsync();
 
-            var vm = new OrganizationDetailsViewModel
+            var viewModel = new OrganizationDetailsViewModel
             {
                 Organization = organization,
+                OrganizationId = organization.Id, // ✅ tu ustawiamy wartość
                 AvailableTeams = availableTeams
             };
 
-            return View(vm);
+            return View(viewModel);
         }
 
-        // POST: Organization/AssignTeam
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AssignTeam(OrganizationDetailsViewModel model)
         {
-            if (model.SelectedTeamId == 0)
+            /*if (!ModelState.IsValid)
             {
-                ModelState.AddModelError("", "Wybierz drużynę.");
-            }
-
-            if (!ModelState.IsValid)
-            {
-                // ponownie załaduj dane do widoku, jeśli błąd
+                // Ponownie załaduj dane do widoku
                 model.Organization = await _context.Organizations
                     .Include(o => o.Teams)
-                    .FirstOrDefaultAsync(o => o.Id == model.Organization.Id);
+                    .FirstOrDefaultAsync(o => o.Id == model.OrganizationId);
 
                 model.AvailableTeams = await _context.Teams
                     .Where(t => t.OrganizationId == null)
                     .ToListAsync();
 
                 return View("Details", model);
-            }
+            }*/
+
+            var organization = await _context.Organizations
+                .Include(o => o.Teams)
+                .FirstOrDefaultAsync(o => o.Id == model.OrganizationId);
+
+            if (organization == null)
+                return NotFound();
 
             var team = await _context.Teams.FindAsync(model.SelectedTeamId);
             if (team == null)
                 return NotFound();
 
-            team.OrganizationId = model.Organization.Id;
+            team.OrganizationId = organization.Id;
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Details), new { id = model.Organization.Id });
+            return RedirectToAction(nameof(Details), new { id = model.OrganizationId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveTeam(int teamId, int organizationId)
+        {
+            var team = await _context.Teams.FindAsync(teamId);
+            if (team == null || team.OrganizationId != organizationId)
+            {
+                return NotFound();
+            }
+
+            team.OrganizationId = null;
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Details), new { id = organizationId });
         }
 
     }

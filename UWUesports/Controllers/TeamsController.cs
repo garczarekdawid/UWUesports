@@ -34,6 +34,7 @@ namespace UWUesports.Web.Controllers
             var model = await PaginatedList<Team>.CreateAsync(query, page, pageSize);
 
             ViewData["AllowedPageSizes"] = allowedPageSizes;
+            ViewData["searchName"] = searchName;
 
             return View(model);
         }

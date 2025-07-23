@@ -3,24 +3,50 @@
 <h2>@Model.Organization.Name</h2>
 
 <h3>Drużyny przypisane:</h3>
-<ul>
-    @foreach (var team in Model.Organization.Teams)
-    {
-        <li>@team.Name</li>
-    }
-</ul>
+
+@if (Model.Organization?.Teams != null && Model.Organization.Teams.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nazwa drużyny</th>
+                <th>Akcje</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var team in Model.Organization.Teams)
+            {
+                <tr>
+                    <td>@team.Name</td>
+                    <td>
+                        <form asp-action="RemoveTeam" asp-controller="Organization" method="post" style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="teamId" value="@team.Id" />
+                            <input type="hidden" name="organizationId" value="@Model.Organization.Id" />
+                            <button type="submit" class="btn btn-danger btn-sm">Usuń</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Brak przypisanych drużyn.</p>
+}
 
 <h3>Przypisz nową drużynę:</h3>
 
-<form asp-action="AssignTeam" method="post">
-    <input type="hidden" asp-for="Organization.Id" />
+<form asp-action="AssignTeam" asp-controller="Organization" method="post">
+    <input type="hidden" asp-for="OrganizationId" />
 
-    <select asp-for="SelectedTeamId" asp-items="@(new SelectList(Model.AvailableTeams, "Id", "Name"))">
+    <select asp-for="SelectedTeamId" asp-items="@(new SelectList(Model.AvailableTeams, "Id", "Name"))" class="form-select">
         <option value="">-- Wybierz drużynę --</option>
     </select>
     <span asp-validation-for="SelectedTeamId" class="text-danger"></span>
 
-    <button type="submit">Przypisz</button>
+    <button type="submit" class="btn btn-primary">Przypisz</button>
 </form>
 
 @section Scripts {
