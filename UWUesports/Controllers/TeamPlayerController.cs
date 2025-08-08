@@ -26,7 +26,7 @@ namespace UWUesports.Web.Controllers
         {
             if (!await _context.TeamPlayers.AnyAsync(tp => tp.TeamId == teamId && tp.UserId  == playerId))
             {
-                _context.TeamPlayers.Add(new TeamPlayer { TeamId = teamId, UserId  = playerId });
+                _context.TeamPlayers.Add(new Membership { TeamId = teamId, UserId  = playerId });
                 await _context.SaveChangesAsync();
             }
             return RedirectToAction("Details", "Teams", new { id = teamId });
@@ -46,7 +46,7 @@ namespace UWUesports.Web.Controllers
                 .ToListAsync();
 
             var newPlayers = playerIds.Except(existingPlayerIds)
-                .Select(pid => new TeamPlayer { TeamId = teamId, UserId  = pid });
+                .Select(pid => new Membership { TeamId = teamId, UserId  = pid });
 
             _context.TeamPlayers.AddRange(newPlayers);
             await _context.SaveChangesAsync();

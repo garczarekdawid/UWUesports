@@ -1,0 +1,113 @@
+﻿@model UWUesports.Web.ViewModels.AssignUserRoleViewModel
+
+@{
+    ViewData["Title"] = "Przypisz rolę użytkownikowi";
+}
+
+<h2>Przypisz rolę</h2>
+
+<form asp-action="Create" method="post" id="assignForm">
+    <div class="form-group mb-3">
+        <label>Organizacja</label>
+        <select id="organizationSelect" name="OrganizationId" class="form-control" required>
+            <option value="">-- Wybierz organizację --</option>
+            @foreach (var org in Model.Organizations)
+            {
+                <option value="@org.Id">@org.Name</option>
+            }
+        </select>
+    </div>
+
+    <div class="form-group mb-3">
+        <label>Użytkownik</label>
+        <select id="userSelect" name="UserId" class="form-control" required disabled>
+            <option value="">Wybierz organizację, aby załadować użytkowników</option>
+        </select>
+    </div>
+
+    <div class="form-group mb-3">
+        <label>Rola</label>
+        <select name="RoleId" class="form-control" required>
+            <option value="">-- Wybierz rolę --</option>
+            @foreach (var role in Model.Roles)
+            {
+                <option value="@role.Id">@role.Name</option>
+            }
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Przypisz rolę</button>
+</form>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        $(function() {
+            $('#organizationSelect').change(function() {
+                var orgId = $(this).val();
+                var userSelect = $('#userSelect');
+                userSelect.prop('disabled', true);
+                userSelect.empty();
+
+                if (!orgId) {
+                    userSelect.append('<option value="">Wybierz organizację, aby załadować użytkowników</option>');
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("GetUsersByOrganization", "UserRoleAssignment")',
+                    type: 'GET',
+                    data: { organizationId: orgId },
+                    success: function(users) {
+                        if (users.length === 0) {
+                            userSelect.append('<option value="">Brak użytkowników w tej organizacji, wpisz nazwę poniżej</option>');
+                            userSelect.prop('disabled', true);
+
+                            // tutaj możesz wyświetlić dodatkowe pole do globalnego wyszukiwania użytkownika
+                            if ($('#userSearch').length === 0) {
+                                $('<input type="text" id="userSearch" class="form-control mt-2" placeholder="Szukaj użytkownika (globalnie)"/>').insertAfter(userSelect);
+
+                                $('#userSearch').on('input', function() {
+                                    var searchTerm = $(this).val();
+                                    if (searchTerm.length < 2) return;
+
+                                    $.ajax({
+                                        url: '@Url.Action("SearchUsers", "UserRoleAssignment")',
+                                        type: 'GET',
+                                        data: { term: searchTerm },
+                                        success: function(globalUsers) {
+                                            // usuń poprzednie opcje i dodaj nowe
+                                            var searchSelect = $('#userSearchSelect');
+                                            if (searchSelect.length === 0) {
+                                                $('<select id="userSearchSelect" name="UserId" class="form-control mt-2" required></select>').insertAfter('#userSearch');
+                                            } else {
+                                                searchSelect.empty();
+                                            }
+                                            if (globalUsers.length === 0) {
+                                                searchSelect.append('<option value="">Brak wyników</option>');
+                                            } else {
+                                                searchSelect.append('<option value="">-- Wybierz użytkownika --</option>');
+                                                $.each(globalUsers, function(i, user) {
+                                                    var orgNames = user.organizations.map(o => o.name).join(", ");
+                                                    searchSelect.append('<option value="' + user.id + '">' + user.nickname + ' (' + orgNames + ')</option>');
+                                                });
+                                            }
+                                        }
+                                    });
+                                });
+                            }
+                        } else {
+                            userSelect.prop('disabled', false);
+                            userSelect.append('<option value="">-- Wybierz użytkownika --</option>');
+                            $.each(users, function(i, user) {
+                                userSelect.append('<option value="' + user.id + '">' + user.nickname + '</option>');
+                            });
+                            $('#userSearch, #userSearchSelect').remove();
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+}

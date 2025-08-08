@@ -15,8 +15,8 @@ namespace UWUesports.Web.Models
         [MinLength(3, ErrorMessage = "Nick musi mieć minimalnie 3 znaki.")]
         public string Nickname { get; set; }
 
-        public string Role { get; set; }  // np. User, Coach, Admin
+        public List<UserRoleAssignment> RoleAssignments { get; set; } = new();
 
-        public List<TeamPlayer> TeamPlayers { get; set; } = new();
+        public List<Membership> TeamPlayers { get; set; } = new();
     }
 }

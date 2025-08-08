@@ -16,13 +16,24 @@ namespace UWUesports.Web.Data
             {
                 context.Database.Migrate();
 
-                if (context.Teams.Any() || context.Users.Any() || context.Organizations.Any())
+                if (context.Users.Any() || context.Organizations.Any())
                 {
                     logger.LogInformation("Dane już istnieją, seed pominięty.");
                     return;
                 }
 
-                // Dodaj organizacje
+                // === 1. Role ===
+                var roles = new List<Role>
+                {
+                    new Role { Name = "Admin" },
+                    new Role { Name = "Coach" },
+                    new Role { Name = "Manager" },
+                    new Role { Name = "Player" }
+                };
+                context.Roles.AddRange(roles);
+                context.SaveChanges();
+
+                // === 2. Organizacje ===
                 var organizations = new List<Organization>
                 {
                     new Organization { Name = "Esports United" },
@@ -31,17 +42,29 @@ namespace UWUesports.Web.Data
                 context.Organizations.AddRange(organizations);
                 context.SaveChanges();
 
-                // Dodaj użytkowników
+                // === 3. Użytkownicy ===
                 var users = new List<User>
                 {
-                    new User { Nickname = "PogChamp", Email = "pogchamp@example.com", Role = "User" },
-                    new User { Nickname = "UwUCat", Email = "uwucat@example.com", Role = "Coach" },
-                    new User { Nickname = "AimMaster", Email = "aimmaster@example.com", Role = "User" },
-                    new User { Nickname = "ProGamer", Email = "progamer@example.com", Role = "Admin" }
+                    new User { Nickname = "PogChamp", Email = "pogchamp@example.com" },
+                    new User { Nickname = "UwUCat", Email = "uwucat@example.com" },
+                    new User { Nickname = "AimMaster", Email = "aimmaster@example.com" },
+                    new User { Nickname = "ProGamer", Email = "progamer@example.com" }
                 };
                 context.Users.AddRange(users);
+                context.SaveChanges();
 
-                // Dodaj drużyny z przypisaniem do organizacji
+                // === 4. Role w organizacji ===
+                var roleAssignments = new List<UserRoleAssignment>
+                {
+                    new UserRoleAssignment { UserId = users[0].Id, OrganizationId = organizations[0].Id, RoleId = roles.Single(r => r.Name == "Player").Id },
+                    new UserRoleAssignment { UserId = users[1].Id, OrganizationId = organizations[0].Id, RoleId = roles.Single(r => r.Name == "Coach").Id },
+                    new UserRoleAssignment { UserId = users[2].Id, OrganizationId = organizations[0].Id, RoleId = roles.Single(r => r.Name == "Player").Id },
+                    new UserRoleAssignment { UserId = users[3].Id, OrganizationId = organizations[1].Id, RoleId = roles.Single(r => r.Name == "Admin").Id }
+                };
+                context.UserRoleAssignments.AddRange(roleAssignments);
+                context.SaveChanges();
+
+                // === 5. Drużyny ===
                 var teams = new List<Team>
                 {
                     new Team { Name = "UwUGamers", OrganizationId = organizations[0].Id },
@@ -49,22 +72,21 @@ namespace UWUesports.Web.Data
                     new Team { Name = "EliteSquad", OrganizationId = organizations[1].Id }
                 };
                 context.Teams.AddRange(teams);
-
                 context.SaveChanges();
 
-                // Powiązania TeamPlayer
-                var teamPlayers = new List<TeamPlayer>
+                // === 6. Membership (Użytkownicy w drużynach) ===
+                var memberships = new List<Membership>
                 {
-                    new TeamPlayer { TeamId = teams[0].Id, UserId = users[0].Id },
-                    new TeamPlayer { TeamId = teams[0].Id, UserId = users[1].Id },
-                    new TeamPlayer { TeamId = teams[1].Id, UserId = users[1].Id },
-                    new TeamPlayer { TeamId = teams[1].Id, UserId = users[2].Id },
-                    new TeamPlayer { TeamId = teams[2].Id, UserId = users[3].Id }
+                    new Membership { TeamId = teams[0].Id, UserId = users[0].Id },
+                    new Membership { TeamId = teams[0].Id, UserId = users[1].Id },
+                    new Membership { TeamId = teams[1].Id, UserId = users[1].Id },
+                    new Membership { TeamId = teams[1].Id, UserId = users[2].Id },
+                    new Membership { TeamId = teams[2].Id, UserId = users[3].Id }
                 };
-                context.TeamPlayers.AddRange(teamPlayers);
-
+                context.TeamPlayers.AddRange(memberships);
                 context.SaveChanges();
-                logger.LogInformation("Dane testowe z organizacjami zostały dodane do bazy danych.");
+
+                logger.LogInformation("Dane testowe zostały poprawnie dodane do bazy danych.");
             }
             catch (Exception ex)
             {

@@ -18,6 +18,6 @@ namespace UWUesports.Web.Models
         // Nawigacja do organizacji
         public Organization? Organization { get; set; }
 
-        public List<TeamPlayer> TeamPlayers { get; set; } = new();
+        public List<Membership> TeamPlayers { get; set; } = new();
     }
 }

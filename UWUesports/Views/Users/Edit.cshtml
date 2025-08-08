@@ -26,9 +26,20 @@
             </div>
 
             <div class="form-group mb-3">
-                <label asp-for="Role" class="control-label"></label>
-                <input asp-for="Role" class="form-control" />
-                <span asp-validation-for="Role" class="text-danger"></span>
+                <label>Przypisane role</label>
+                @if (Model.RoleAssignments != null && Model.RoleAssignments.Any())
+                {
+                    <ul>
+                        @foreach (var roleAssignment in Model.RoleAssignments)
+                        {
+                            <li>@roleAssignment.Role.Name - @roleAssignment.Organization.Name</li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p>Brak przypisanych ról</p>
+                }
             </div>
 
             <div class="form-group">

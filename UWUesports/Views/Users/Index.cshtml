@@ -7,11 +7,11 @@
 <div>
     <form method="get" asp-action="Index" id="searchForm" class="mb-3 d-flex align-items-center gap-2" style="max-width: 600px;">
         <input type="text" name="searchNickname" placeholder="Szukaj po nicku"
-               value="@ViewData["searchNickname"]" class="form-control"
-               onchange="document.getElementById('searchForm').submit()" />
+        value="@ViewData["searchNickname"]" class="form-control"
+        onchange="document.getElementById('searchForm').submit()" />
         <input type="text" name="searchEmail" placeholder="Szukaj po emailu"
-               value="@ViewData["searchEmail"]" class="form-control"
-               onchange="document.getElementById('searchForm').submit()" />
+        value="@ViewData["searchEmail"]" class="form-control"
+        onchange="document.getElementById('searchForm').submit()" />
     </form>
 </div>
 
@@ -31,14 +31,34 @@
             <tr>
                 <td>@user.Nickname</td>
                 <td>@user.Email</td>
-                <td>@user.Role</td>
+                <td>
+                    @if (user.RoleAssignments != null && user.RoleAssignments.Any())
+                    {
+                        <ul>
+                            @foreach (var roleAssignment in user.RoleAssignments)
+                            {
+                                <li>@roleAssignment.Role.Name - @roleAssignment.Organization.Name</li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <span>Brak przypisanych ról</span>
+                    }
+                </td>
                 <td>
                     @if (user.TeamPlayers != null && user.TeamPlayers.Any())
                     {
                         <ul>
                             @foreach (var tp in user.TeamPlayers)
                             {
-                                <li>@tp.Team.Name</li>
+                                <li>
+                                    @tp.Team.Name 
+                                    (@if (tp.Team.Organization != null)
+                                    {
+                                        @tp.Team.Organization.Name
+                                    })
+                                </li>
                             }
                         </ul>
                     }

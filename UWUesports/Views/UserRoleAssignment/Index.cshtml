@@ -1,0 +1,53 @@
+﻿@model List<UWUesports.Web.Models.UserRoleAssignment>
+
+@{
+    ViewData["Title"] = "Przypisania ról";
+}
+
+<h2>Przypisania ról użytkownikom</h2>
+
+<a asp-action="Create" class="btn btn-primary mb-3">Dodaj nowe przypisanie</a>
+
+@if (Model == null || !Model.Any())
+{
+    <p>Brak przypisań.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Użytkownik</th>
+                <th>Organizacja</th>
+                <th>Rola</th>
+                <th>Akcje</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.User.Nickname (@item.User.Email)</td>
+                    <td>@item.Organization.Name</td>
+                    <td>@item.Role.Name</td>
+                    <td>
+                        <a asp-action="Edit" asp-controller="UserRoleAssignment"
+                           asp-route-userId="@item.UserId"
+                           asp-route-organizationId="@item.OrganizationId"
+                           asp-route-roleId="@item.RoleId"
+                           class="btn btn-warning btn-sm">
+                            Edytuj
+                        </a>
+                        <form asp-action="Delete" asp-controller="UserRoleAssignment" method="post" style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="UserId" value="@item.UserId" />
+                            <input type="hidden" name="OrganizationId" value="@item.OrganizationId" />
+                            <input type="hidden" name="RoleId" value="@item.RoleId" />
+                            <button type="submit" class="btn btn-danger btn-sm">Usuń</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

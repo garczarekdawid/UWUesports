@@ -1,6 +1,6 @@
 ﻿namespace UWUesports.Web.Models
 {
-    public class TeamPlayer
+    public class Membership
     {
         public int TeamId { get; set; }
         public Team Team { get; set; }

@@ -11,6 +11,7 @@ namespace UWUesports.Web.Models
         public string Name { get; set; }
 
         public List<Team> Teams { get; set; } = new();
+        public List<UserRoleAssignment> UserRoles { get; set; } = new();
 
     }
 }

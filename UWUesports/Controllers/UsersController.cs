@@ -15,26 +15,31 @@ namespace UWUesports.Web.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index(string searchEmail = "", string searchNickname = "", int page = 1, int pageSize = 5)
+        public async Task<IActionResult> Index(string? searchNickname, string? searchEmail, int page = 1, int pageSize = 10)
         {
-            int[] allowedPageSizes = new[] { 5, 10, 20, 50, 100 };
             var query = _context.Users
-                    .Include(u => u.TeamPlayers)
-                        .ThenInclude(tp => tp.Team)
-                    .AsQueryable();
+                .Include(u => u.RoleAssignments).ThenInclude(ra => ra.Role)
+                .Include(u => u.RoleAssignments).ThenInclude(ra => ra.Organization)
+                .Include(u => u.TeamPlayers).ThenInclude(tp => tp.Team).ThenInclude(t => t.Organization)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(searchNickname))
+            {
+                query = query.Where(u => u.Nickname.Contains(searchNickname));
+                ViewData["searchNickname"] = searchNickname;
+            }
 
             if (!string.IsNullOrWhiteSpace(searchEmail))
-                query = query.Where(u => u.Email.ToLower().Contains(searchEmail.ToLower()));
-            if (!string.IsNullOrWhiteSpace(searchNickname))
-                query = query.Where(u => u.Nickname.ToLower().Contains(searchNickname.ToLower()));
+            {
+                query = query.Where(u => u.Email.Contains(searchEmail));
+                ViewData["searchEmail"] = searchEmail;
+            }
 
-            var model = await PaginatedList<User>.CreateAsync(query, page, pageSize);
+            var paginated = await PaginatedList<User>.CreateAsync(query.AsNoTracking(), page, pageSize);
 
-            ViewData["searchEmail"] = searchEmail;
-            ViewData["searchNickname"] = searchNickname;
-            ViewData["AllowedPageSizes"] = allowedPageSizes;
+            ViewData["AllowedPageSizes"] = new[] {5, 10, 25, 50, 100 }; // <== tu to dodajesz
 
-            return View(model);
+            return View(paginated);
         }
 
         // GET: Users/Create
