@@ -1,53 +1,58 @@
-﻿@model List<UWUesports.Web.Models.UserRoleAssignment>
+﻿@model IEnumerable<UWUesports.Web.Models.UserRoleAssignment>
 
 @{
     ViewData["Title"] = "Przypisania ról";
 }
 
-<h2>Przypisania ról użytkownikom</h2>
+<h2>@ViewData["Title"]</h2>
 
-<a asp-action="Create" class="btn btn-primary mb-3">Dodaj nowe przypisanie</a>
-
-@if (Model == null || !Model.Any())
+@if (TempData["Success"] != null)
 {
-    <p>Brak przypisań.</p>
+    <div class="alert alert-success">@TempData["Success"]</div>
 }
-else
+
+@if (TempData["Error"] != null)
 {
-    <table class="table table-striped">
-        <thead>
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Nowe przypisanie</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Użytkownik</th>
+            <th>Organizacja</th>
+            <th>Rola</th>
+            <th>Akcje</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
             <tr>
-                <th>Użytkownik</th>
-                <th>Organizacja</th>
-                <th>Rola</th>
-                <th>Akcje</th>
+                <td>@item.User.Nickname</td>
+                <td>@item.Organization.Name</td>
+                <td>@item.Role.Name</td>
+                <td>
+                    <a asp-action="Edit"
+                       asp-route-userId="@item.UserId"
+                       asp-route-organizationId="@item.OrganizationId"
+                       asp-route-roleId="@item.RoleId"
+                       class="btn btn-sm btn-warning">Edytuj</a>
+                    <form asp-action="Delete" method="post" style="display:inline">
+                        <input type="hidden" name="userId" value="@item.UserId" />
+                        <input type="hidden" name="organizationId" value="@item.OrganizationId" />
+                        <input type="hidden" name="roleId" value="@item.RoleId" />
+                        <button type="submit" class="btn btn-sm btn-danger"
+                                onclick="return confirm('Czy na pewno chcesz usunąć to przypisanie?')">
+                            Usuń
+                        </button>
+                    </form>
+                </td>
             </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td>@item.User.Nickname (@item.User.Email)</td>
-                    <td>@item.Organization.Name</td>
-                    <td>@item.Role.Name</td>
-                    <td>
-                        <a asp-action="Edit" asp-controller="UserRoleAssignment"
-                           asp-route-userId="@item.UserId"
-                           asp-route-organizationId="@item.OrganizationId"
-                           asp-route-roleId="@item.RoleId"
-                           class="btn btn-warning btn-sm">
-                            Edytuj
-                        </a>
-                        <form asp-action="Delete" asp-controller="UserRoleAssignment" method="post" style="display:inline;">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="UserId" value="@item.UserId" />
-                            <input type="hidden" name="OrganizationId" value="@item.OrganizationId" />
-                            <input type="hidden" name="RoleId" value="@item.RoleId" />
-                            <button type="submit" class="btn btn-danger btn-sm">Usuń</button>
-                        </form>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+        }
+    </tbody>
+</table>

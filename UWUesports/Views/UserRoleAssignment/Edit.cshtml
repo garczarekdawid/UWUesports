@@ -1,68 +1,18 @@
 ﻿@model UWUesports.Web.ViewModels.AssignUserRoleViewModel
-
 @{
-    ViewData["Title"] = "Edytuj przypisanie roli";
-
-    string RenderOptions<T>(IEnumerable<T> items, Func<T, int> idSelector, Func<T, string> textSelector, int selectedId)
-    {
-        var sb = new System.Text.StringBuilder();
-        foreach (var item in items)
-        {
-            var id = idSelector(item);
-            var text = textSelector(item);
-            var selected = (id == selectedId) ? " selected" : "";
-            sb.AppendLine($"<option value=\"{id}\"{selected}>{text}</option>");
-        }
-        return sb.ToString();
-    }
+    ViewData["Title"] = "Edycja przypisania roli";
 }
 
-<h2>Edytuj przypisanie roli</h2>
-
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger">@TempData["Error"]</div>
-}
+<h2>Edycja przypisania roli</h2>
 
 <form asp-action="Edit" method="post">
-    <input type="hidden" name="originalUserId" value="@Model.UserId" />
-    <input type="hidden" name="originalOrganizationId" value="@Model.OrganizationId" />
-    <input type="hidden" name="originalRoleId" value="@Model.RoleId" />
-
-    <div class="form-group">
-        <label>Użytkownik</label>
-        <select class="form-control select2" name="UserId" required>
-            @Html.Raw(RenderOptions(Model.Users, u => u.Id, u => $"{u.Nickname} ({u.Email})", Model.UserId))
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label>Organizacja</label>
-        <select class="form-control select2" name="OrganizationId" required>
-            @Html.Raw(RenderOptions(Model.Organizations, o => o.Id, o => o.Name, Model.OrganizationId))
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label>Rola</label>
-        <select class="form-control select2" name="RoleId" required>
-            @Html.Raw(RenderOptions(Model.Roles, r => r.Id, r => r.Name, Model.RoleId))
-        </select>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Zapisz zmiany</button>
     @Html.AntiForgeryToken()
-</form>
+    <input type="hidden" name="originalUserId" value="@ViewBag.OriginalUserId" />
+    <input type="hidden" name="originalOrganizationId" value="@ViewBag.OriginalOrganizationId" />
+    <input type="hidden" name="originalRoleId" value="@ViewBag.OriginalRoleId" />
 
-@section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script>
-        $(document).ready(function () {
-            $('.select2').select2({
-                width: '100%',
-                placeholder: 'Szukaj...',
-                allowClear: true
-            });
-        });
-    </script>
-}
+    @await Html.PartialAsync("_Form", Model)
+
+    <button type="submit" class="btn btn-primary">Zapisz</button>
+    <a asp-action="Index" class="btn btn-secondary">Anuluj</a>
+</form>

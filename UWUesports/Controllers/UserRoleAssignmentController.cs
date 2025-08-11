@@ -1,200 +1,247 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using UWUesports.Web.Data;
 using UWUesports.Web.Models;
 using UWUesports.Web.ViewModels;
 
-public class UserRoleAssignmentController : Controller
+namespace UWUesports.Web.Controllers
 {
-    private readonly UWUesportDbContext _context;
-
-    public UserRoleAssignmentController(UWUesportDbContext context)
+    public class UserRoleAssignmentController : Controller
     {
-        _context = context;
-    }
+        private readonly UWUesportDbContext _context;
 
-    [HttpGet]
-    public IActionResult Create()
-    {
-        var vm = new AssignUserRoleViewModel
+        public UserRoleAssignmentController(UWUesportDbContext context)
         {
-            Users = _context.Users.ToList(),
-            Organizations = _context.Organizations.ToList(),
-            Roles = _context.Roles.ToList()
-        };
-
-        return View(vm);
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public IActionResult Create(AssignUserRoleViewModel model)
-    {
-        if (!ModelState.IsValid)
-        {
-            model.Users = _context.Users.ToList();
-            model.Organizations = _context.Organizations.ToList();
-            model.Roles = _context.Roles.ToList();
-            return View(model);
+            _context = context;
         }
 
-        var exists = _context.UserRoleAssignments.Any(x =>
-            x.UserId == model.UserId &&
-            x.OrganizationId == model.OrganizationId &&
-            x.RoleId == model.RoleId);
-
-        if (exists)
+        // GET: UserRoleAssignment
+        public IActionResult Index()
         {
-            TempData["Error"] = "To przypisanie już istnieje.";
-            return RedirectToAction("Create");
+            var assignments = _context.UserRoleAssignments
+                .Include(x => x.User)
+                .Include(x => x.Organization)
+                .Include(x => x.Role)
+                .ToList();
+
+            return View(assignments);
         }
 
-        var assignment = new UserRoleAssignment
+        // GET: UserRoleAssignment/Create
+        [HttpGet]
+        public IActionResult Create(int? organizationId)
         {
-            UserId = model.UserId,
-            OrganizationId = model.OrganizationId,
-            RoleId = model.RoleId
-        };
+            var vm = new AssignUserRoleViewModel
+            {
+                Organizations = _context.Organizations.ToList(),
+                Roles = _context.Roles.ToList(),
+                Users = organizationId.HasValue && organizationId != 0
+                    ? _context.Teams
+                        .Where(t => t.OrganizationId == organizationId.Value)
+                        .SelectMany(t => t.TeamPlayers)
+                        .Select(tp => tp.User)
+                        .Distinct()
+                        .ToList()
+                    : new List<User>(),
+                OrganizationId = organizationId ?? 0
+            };
 
-        _context.UserRoleAssignments.Add(assignment);
-        _context.SaveChanges();
+            return View(vm);
+        }
 
-        return RedirectToAction("Index"); // Zrobimy później
-    }
-
-    public IActionResult Index()
-    {
-        var assignments = _context.UserRoleAssignments
-            .Include(x => x.User)
-            .Include(x => x.Organization)
-            .Include(x => x.Role)
-            .ToList();
-
-        return View(assignments);
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public IActionResult Delete(int userId, int organizationId, int roleId)
-    {
-        var assignment = _context.UserRoleAssignments
-            .FirstOrDefault(x => x.UserId == userId && x.OrganizationId == organizationId && x.RoleId == roleId);
-
-        if (assignment != null)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Create(AssignUserRoleViewModel model)
         {
-            _context.UserRoleAssignments.Remove(assignment);
+            if (!ModelState.IsValid)
+            {
+                // jeśli błędy, zwróć ponownie widok z wczytanymi listami
+                model.Organizations = _context.Organizations.ToList();
+                model.Roles = _context.Roles.ToList();
+                model.Users = model.OrganizationId != 0
+                    ? _context.Teams
+                        .Where(t => t.OrganizationId == model.OrganizationId)
+                        .SelectMany(t => t.TeamPlayers)
+                        .Select(tp => tp.User)
+                        .Distinct()
+                        .ToList()
+                    : new List<User>();
+
+                return View(model);
+            }
+
+            bool exists = _context.UserRoleAssignments.Any(x =>
+                x.UserId == model.UserId &&
+                x.OrganizationId == model.OrganizationId &&
+                x.RoleId == model.RoleId);
+
+            if (exists)
+            {
+                TempData["Error"] = "To przypisanie już istnieje.";
+                return RedirectToAction(nameof(Create), new { organizationId = model.OrganizationId });
+            }
+
+            var assignment = new UserRoleAssignment
+            {
+                UserId = model.UserId.Value,
+                OrganizationId = model.OrganizationId.Value,
+                RoleId = model.RoleId.Value
+            };
+
+            _context.UserRoleAssignments.Add(assignment);
             _context.SaveChanges();
+
+            return RedirectToAction(nameof(Index));
         }
 
-        return RedirectToAction("Index");
-    }
 
-
-    [HttpGet]
-    public IActionResult Edit(int userId, int organizationId, int roleId)
-    {
-        var assignment = _context.UserRoleAssignments
-            .Include(x => x.User)
-            .Include(x => x.Organization)
-            .Include(x => x.Role)
-            .FirstOrDefault(x => x.UserId == userId && x.OrganizationId == organizationId && x.RoleId == roleId);
-
-        if (assignment == null)
-            return NotFound();
-
-        var vm = new AssignUserRoleViewModel
+        
+        private IActionResult LoadUsersView(AssignUserRoleViewModel model)
         {
-            UserId = assignment.UserId,
-            OrganizationId = assignment.OrganizationId,
-            RoleId = assignment.RoleId,
-            Users = _context.Users.ToList(),
-            Organizations = _context.Organizations.ToList(),
-            Roles = _context.Roles.ToList()
-        };
-
-        return View(vm);
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public IActionResult Edit(int originalUserId, int originalOrganizationId, int originalRoleId, AssignUserRoleViewModel model)
-    {
-        if (!ModelState.IsValid)
-        {
-            model.Users = _context.Users.ToList();
             model.Organizations = _context.Organizations.ToList();
             model.Roles = _context.Roles.ToList();
+
+            if (model.OrganizationId.HasValue)
+            {
+                model.Users = _context.Teams
+                    .Where(t => t.OrganizationId == model.OrganizationId.Value)
+                    .SelectMany(t => t.TeamPlayers)
+                    .Select(tp => tp.User)
+                    .Distinct()
+                    .ToList();
+            }
+            else
+            {
+                model.Users = new List<User>();
+            }
+
             return View(model);
         }
 
-        var original = _context.UserRoleAssignments
-            .FirstOrDefault(x =>
-                x.UserId == originalUserId &&
-                x.OrganizationId == originalOrganizationId &&
-                x.RoleId == originalRoleId);
 
-        if (original == null)
-            return NotFound();
-
-        // Sprawdź, czy nowe przypisanie już istnieje
-        bool duplicate = _context.UserRoleAssignments.Any(x =>
-            x.UserId == model.UserId &&
-            x.OrganizationId == model.OrganizationId &&
-            x.RoleId == model.RoleId &&
-            (x.UserId != originalUserId || x.OrganizationId != originalOrganizationId || x.RoleId != originalRoleId));
-
-        if (duplicate)
+        // GET: UserRoleAssignment/Edit
+        [HttpGet]
+        public IActionResult Edit(int userId, int organizationId, int roleId)
         {
-            TempData["Error"] = "Takie przypisanie już istnieje.";
-            return RedirectToAction("Edit", new { userId = originalUserId, organizationId = originalOrganizationId, roleId = originalRoleId });
+            var assignment = _context.UserRoleAssignments
+                .Include(x => x.User)
+                .Include(x => x.Organization)
+                .Include(x => x.Role)
+                .FirstOrDefault(x => x.UserId == userId && x.OrganizationId == organizationId && x.RoleId == roleId);
+
+            if (assignment == null)
+                return NotFound();
+
+            var vm = new AssignUserRoleViewModel
+            {
+                UserId = assignment.UserId,
+                OrganizationId = assignment.OrganizationId,
+                RoleId = assignment.RoleId,
+                Organizations = _context.Organizations.ToList(),
+                Roles = _context.Roles.ToList(),
+                Users = _context.Teams
+                    .Where(t => t.OrganizationId == assignment.OrganizationId)
+                    .SelectMany(t => t.TeamPlayers)
+                    .Select(tp => tp.User)
+                    .Distinct()
+                    .ToList()
+            };
+
+            ViewBag.OriginalUserId = assignment.UserId;
+            ViewBag.OriginalOrganizationId = assignment.OrganizationId;
+            ViewBag.OriginalRoleId = assignment.RoleId;
+
+            return View(vm);
         }
 
-        // Usuń stare przypisanie i dodaj nowe
-        _context.UserRoleAssignments.Remove(original);
-        _context.UserRoleAssignments.Add(new UserRoleAssignment
+        // POST: UserRoleAssignment/Edit
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(int originalUserId, int originalOrganizationId, int originalRoleId, AssignUserRoleViewModel model)
         {
-            UserId = model.UserId,
-            OrganizationId = model.OrganizationId,
-            RoleId = model.RoleId
-        });
+            if (!ModelState.IsValid)
+            {
+                model.Organizations = _context.Organizations.ToList();
+                model.Roles = _context.Roles.ToList();
+                model.Users = model.OrganizationId != 0
+                    ? _context.Teams
+                        .Where(t => t.OrganizationId == model.OrganizationId)
+                        .SelectMany(t => t.TeamPlayers)
+                        .Select(tp => tp.User)
+                        .Distinct()
+                        .ToList()
+                    : new List<User>();
 
-        _context.SaveChanges();
+                return View(model);
+            }
 
-        return RedirectToAction("Index");
-    }
+            try
+            {
+                var original = _context.UserRoleAssignments
+                    .FirstOrDefault(x =>
+                        x.UserId == originalUserId &&
+                        x.OrganizationId == originalOrganizationId &&
+                        x.RoleId == originalRoleId);
 
-    [HttpGet]
-    public async Task<IActionResult> GetUsersByOrganization(int organizationId)
-    {
-        var users = await _context.Teams
-            .Where(t => t.OrganizationId == organizationId)
-            .SelectMany(t => t.TeamPlayers)
-            .Select(tp => tp.User)
-            .Distinct()
-            .Select(u => new {
-                id = u.Id,
-                nickname = u.Nickname
-            })
-            .ToListAsync();
+                if (original == null)
+                    return NotFound();
 
-        return Json(users);
-    }
+                bool duplicate = _context.UserRoleAssignments.Any(x =>
+                    x.UserId == model.UserId &&
+                    x.OrganizationId == model.OrganizationId &&
+                    x.RoleId == model.RoleId &&
+                    (x.UserId != originalUserId || x.OrganizationId != originalOrganizationId || x.RoleId != originalRoleId));
 
-    [HttpGet]
-    public async Task<IActionResult> SearchUsers(string term)
-    {
-        var users = await _context.Users
-            .Where(u => u.Nickname.Contains(term) || u.Email.Contains(term))
-            .Select(u => new {
-                id = u.Id,
-                nickname = u.Nickname,
-                organizations = u.RoleAssignments.Select(ra => new {
-                    id = ra.Organization.Id,
-                    name = ra.Organization.Name
-                }).ToList()
-            })
-            .ToListAsync();
+                if (duplicate)
+                {
+                    TempData["Error"] = "Takie przypisanie już istnieje.";
+                    return RedirectToAction(nameof(Edit), new { userId = originalUserId, organizationId = originalOrganizationId, roleId = originalRoleId });
+                }
 
-        return Json(users);
+                _context.UserRoleAssignments.Remove(original);
+                _context.UserRoleAssignments.Add(new UserRoleAssignment
+                {
+                    UserId = model.UserId.Value,
+                    OrganizationId = model.OrganizationId.Value,
+                    RoleId = model.RoleId.Value
+                });
+
+                _context.SaveChanges();
+
+                TempData["Success"] = "Przypisanie roli zostało zaktualizowane.";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Wystąpił błąd: {ex.Message}";
+                return RedirectToAction(nameof(Edit), new { userId = originalUserId, organizationId = originalOrganizationId, roleId = originalRoleId });
+            }
+        }
+
+        // POST: UserRoleAssignment/Delete
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Delete(int userId, int organizationId, int roleId)
+        {
+            var assignment = _context.UserRoleAssignments
+                .FirstOrDefault(x => x.UserId == userId && x.OrganizationId == organizationId && x.RoleId == roleId);
+
+            if (assignment != null)
+            {
+                try
+                {
+                    _context.UserRoleAssignments.Remove(assignment);
+                    _context.SaveChanges();
+                    TempData["Success"] = "Przypisanie roli zostało usunięte.";
+                }
+                catch (Exception ex)
+                {
+                    TempData["Error"] = $"Wystąpił błąd: {ex.Message}";
+                }
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

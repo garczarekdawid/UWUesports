@@ -1,113 +1,67 @@
 ﻿@model UWUesports.Web.ViewModels.AssignUserRoleViewModel
-
 @{
-    ViewData["Title"] = "Przypisz rolę użytkownikowi";
+    ViewData["Title"] = "Nowe przypisanie roli";
 }
 
-<h2>Przypisz rolę</h2>
+<h2>@ViewData["Title"]</h2>
 
-<form asp-action="Create" method="post" id="assignForm">
-    <div class="form-group mb-3">
-        <label>Organizacja</label>
-        <select id="organizationSelect" name="OrganizationId" class="form-control" required>
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        <ul>
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@error.ErrorMessage</li>
+            }
+        </ul>
+    </div>
+}
+
+<!-- Formularz wyboru organizacji - GET -->
+<form asp-action="Create" method="get">
+    <div class="mb-3">
+        <label asp-for="OrganizationId" class="form-label">Organizacja</label>
+        <select asp-for="OrganizationId" asp-items="@(new SelectList(Model.Organizations, "Id", "Name"))" class="form-control" onchange="this.form.submit()">
             <option value="">-- Wybierz organizację --</option>
-            @foreach (var org in Model.Organizations)
-            {
-                <option value="@org.Id">@org.Name</option>
-            }
         </select>
+        <span asp-validation-for="OrganizationId" class="text-danger"></span>
     </div>
-
-    <div class="form-group mb-3">
-        <label>Użytkownik</label>
-        <select id="userSelect" name="UserId" class="form-control" required disabled>
-            <option value="">Wybierz organizację, aby załadować użytkowników</option>
-        </select>
-    </div>
-
-    <div class="form-group mb-3">
-        <label>Rola</label>
-        <select name="RoleId" class="form-control" required>
-            <option value="">-- Wybierz rolę --</option>
-            @foreach (var role in Model.Roles)
-            {
-                <option value="@role.Id">@role.Name</option>
-            }
-        </select>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Przypisz rolę</button>
 </form>
 
+<!-- Formularz przypisania roli - POST -->
+@if (Model.OrganizationId != 0)
+{
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+
+        <input type="hidden" asp-for="OrganizationId" />
+
+        <div class="mb-3">
+            <label asp-for="UserId" class="form-label">Użytkownik*</label>
+            <select asp-for="UserId" asp-items="@(new SelectList(Model.Users, "Id", "Nickname"))" class="form-control" required>
+                <option value="">-- Wybierz użytkownika --</option>
+            </select>
+            <span asp-validation-for="UserId" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="RoleId" class="form-label">Rola*</label>
+            <select asp-for="RoleId" asp-items="@(new SelectList(Model.Roles, "Id", "Name"))" class="form-control" required>
+                <option value="">-- Wybierz rolę --</option>
+            </select>
+            <span asp-validation-for="RoleId" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Zapisz przypisanie</button>
+        <a asp-action="Index" class="btn btn-secondary">Anuluj</a>
+    </form>
+}
+
 @section Scripts {
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-    <script>
-        $(function() {
-            $('#organizationSelect').change(function() {
-                var orgId = $(this).val();
-                var userSelect = $('#userSelect');
-                userSelect.prop('disabled', true);
-                userSelect.empty();
-
-                if (!orgId) {
-                    userSelect.append('<option value="">Wybierz organizację, aby załadować użytkowników</option>');
-                    return;
-                }
-
-                $.ajax({
-                    url: '@Url.Action("GetUsersByOrganization", "UserRoleAssignment")',
-                    type: 'GET',
-                    data: { organizationId: orgId },
-                    success: function(users) {
-                        if (users.length === 0) {
-                            userSelect.append('<option value="">Brak użytkowników w tej organizacji, wpisz nazwę poniżej</option>');
-                            userSelect.prop('disabled', true);
-
-                            // tutaj możesz wyświetlić dodatkowe pole do globalnego wyszukiwania użytkownika
-                            if ($('#userSearch').length === 0) {
-                                $('<input type="text" id="userSearch" class="form-control mt-2" placeholder="Szukaj użytkownika (globalnie)"/>').insertAfter(userSelect);
-
-                                $('#userSearch').on('input', function() {
-                                    var searchTerm = $(this).val();
-                                    if (searchTerm.length < 2) return;
-
-                                    $.ajax({
-                                        url: '@Url.Action("SearchUsers", "UserRoleAssignment")',
-                                        type: 'GET',
-                                        data: { term: searchTerm },
-                                        success: function(globalUsers) {
-                                            // usuń poprzednie opcje i dodaj nowe
-                                            var searchSelect = $('#userSearchSelect');
-                                            if (searchSelect.length === 0) {
-                                                $('<select id="userSearchSelect" name="UserId" class="form-control mt-2" required></select>').insertAfter('#userSearch');
-                                            } else {
-                                                searchSelect.empty();
-                                            }
-                                            if (globalUsers.length === 0) {
-                                                searchSelect.append('<option value="">Brak wyników</option>');
-                                            } else {
-                                                searchSelect.append('<option value="">-- Wybierz użytkownika --</option>');
-                                                $.each(globalUsers, function(i, user) {
-                                                    var orgNames = user.organizations.map(o => o.name).join(", ");
-                                                    searchSelect.append('<option value="' + user.id + '">' + user.nickname + ' (' + orgNames + ')</option>');
-                                                });
-                                            }
-                                        }
-                                    });
-                                });
-                            }
-                        } else {
-                            userSelect.prop('disabled', false);
-                            userSelect.append('<option value="">-- Wybierz użytkownika --</option>');
-                            $.each(users, function(i, user) {
-                                userSelect.append('<option value="' + user.id + '">' + user.nickname + '</option>');
-                            });
-                            $('#userSearch, #userSearchSelect').remove();
-                        }
-                    }
-                });
-            });
-        });
-    </script>
+    <partial name="_ValidationScriptsPartial" />
 }
