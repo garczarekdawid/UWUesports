@@ -1,60 +1,38 @@
-﻿@model UWUesports.Web.Models.ApplicationUser
-
-@{
-    ViewData["Title"] = "Edytuj gracza";
-}
+﻿@model UWUesports.Web.ViewModels.EditUserViewModel
 
 <h1>Edytuj gracza</h1>
 
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
 
-            <div class="form-group mb-3">
-                <label asp-for="Nickname" class="control-label"></label>
-                <input asp-for="Nickname" class="form-control" />
-                <span asp-validation-for="Nickname" class="text-danger"></span>
-            </div>
-
-            <div class="form-group mb-3">
-                <label asp-for="Email" class="control-label"></label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-
-            <div class="form-group mb-3">
-                <label>Przypisane role</label>
-                @if (Model.RoleAssignments != null && Model.RoleAssignments.Any())
-                {
-                    <ul>
-                        @foreach (var roleAssignment in Model.RoleAssignments)
-                        {
-                            <li>@roleAssignment.Role.Name - @roleAssignment.Organization.Name</li>
-                        }
-                    </ul>
-                }
-                else
-                {
-                    <p>Brak przypisanych ról</p>
-                }
-            </div>
-
-            <div class="form-group">
-                <input type="submit" value="Zapisz" class="btn btn-primary" />
-            </div>
-        </form>
+    <div class="form-group mb-3">
+        <label asp-for="Nickname"></label>
+        <input asp-for="Nickname" class="form-control" />
+        <span asp-validation-for="Nickname" class="text-danger"></span>
     </div>
-</div>
 
-<div>
-    <a asp-action="Index">Powrót do listy</a>
-</div>
+    <div class="form-group mb-3">
+        <label asp-for="Email"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
 
-@section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-}
+    <div class="form-group mb-3">
+        <label>Przypisz role</label>
+        @foreach (var role in Model.AllRoles)
+        {
+            <div class="form-check">
+                <input type="checkbox"
+                       class="form-check-input"
+                       name="SelectedRoleIds"
+                       value="@role.RoleId"
+                @(role.IsSelected ? "checked" : "") />
+                <label class="form-check-label">@role.RoleName</label>
+            </div>
+        }
+    </div>
+
+    <button type="submit" class="btn btn-primary">Zapisz</button>
+</form>
+
+<a asp-action="Index">Powrót do listy</a>

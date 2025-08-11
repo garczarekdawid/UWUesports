@@ -1,45 +1,54 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using UWUesports.Web.Data;
 using UWUesports.Web.Models;
 using UWUesports.Web.ViewModels;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace UWUesports.Web.Controllers
 {
     public class UsersController : Controller
     {
-        private readonly UWUesportDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<IdentityRole<int>> _roleManager;
 
-        public UsersController(UWUesportDbContext context)
+        public UsersController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole<int>> roleManager)
         {
-            _context = context;
+            _userManager = userManager;
+            _roleManager = roleManager;
         }
 
         public async Task<IActionResult> Index(string? searchNickname, string? searchEmail, int page = 1, int pageSize = 10)
         {
-            var query = _context.Users
-                .Include(u => u.RoleAssignments).ThenInclude(ra => ra.Role)
-                .Include(u => u.RoleAssignments).ThenInclude(ra => ra.Organization)
-                .Include(u => u.TeamPlayers).ThenInclude(tp => tp.Team).ThenInclude(t => t.Organization)
+            // Pobierz wszystkich użytkowników wraz z RoleAssignments i TeamPlayers
+            var usersQuery = _userManager.Users
+                .Include(u => u.RoleAssignments)
+                    .ThenInclude(ra => ra.Role)
+                .Include(u => u.RoleAssignments)
+                    .ThenInclude(ra => ra.Organization)
+                .Include(u => u.TeamPlayers)
+                    .ThenInclude(tp => tp.Team)
+                    .ThenInclude(t => t.Organization)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(searchNickname))
             {
-                query = query.Where(u => u.Nickname.Contains(searchNickname));
+                usersQuery = usersQuery.Where(u => u.Nickname.Contains(searchNickname));
                 ViewData["searchNickname"] = searchNickname;
             }
 
             if (!string.IsNullOrWhiteSpace(searchEmail))
             {
-                query = query.Where(u => u.Email.Contains(searchEmail));
+                usersQuery = usersQuery.Where(u => u.Email.Contains(searchEmail));
                 ViewData["searchEmail"] = searchEmail;
             }
 
-            var paginated = await PaginatedList<ApplicationUser >.CreateAsync(query.AsNoTracking(), page, pageSize);
+            var paginatedUsers = await PaginatedList<ApplicationUser>.CreateAsync(usersQuery.AsNoTracking(), page, pageSize);
 
-            ViewData["AllowedPageSizes"] = new[] {5, 10, 25, 50, 100 }; // <== tu to dodajesz
+            ViewData["AllowedPageSizes"] = new[] { 5, 10, 25, 50, 100 };
 
-            return View(paginated);
+            return View(paginatedUsers);
         }
 
         // GET: Users/Create
@@ -51,70 +60,145 @@ namespace UWUesports.Web.Controllers
         // POST: Users/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(ApplicationUser  user)
+        public async Task<IActionResult> Create(CreateUserViewModel model)
         {
             if (!ModelState.IsValid)
-                return View(user);
+                return View(model);
 
-            var emailExists = await _context.Users.AnyAsync(u => u.Email == user.Email);
-            if (emailExists)
+            var existingUser = await _userManager.FindByEmailAsync(model.Email);
+            if (existingUser != null)
             {
                 ModelState.AddModelError("Email", "Użytkownik z takim emailem już istnieje.");
-                return View(user);
+                return View(model);
             }
 
-            _context.Add(user);
-            await _context.SaveChangesAsync();
+            var user = new ApplicationUser
+            {
+                Nickname = model.Nickname,
+                Email = model.Email,
+                UserName = model.Email
+            };
+
+            var result = await _userManager.CreateAsync(user, model.Password);
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                    ModelState.AddModelError(string.Empty, error.Description);
+                return View(model);
+            }
+
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: Users/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        [HttpGet]
+        public async Task<IActionResult> Edit(string? id)
         {
             if (id == null) return RedirectToAction(nameof(Index));
 
-            var user = await _context.Users.FindAsync(id);
+            var user = await _userManager.FindByIdAsync(id);
             if (user == null) return RedirectToAction(nameof(Index));
 
-            return View(user);
+            var allRoles = await _roleManager.Roles.ToListAsync();
+            var userRoles = await _userManager.GetRolesAsync(user); // role użytkownika jako lista string
+
+            var model = new EditUserViewModel
+            {
+                Id = user.Id,
+                Nickname = user.Nickname,
+                Email = user.Email,
+                AllRoles = allRoles.Select(r => new RoleCheckboxViewModel
+                {
+                    RoleId = r.Id,
+                    RoleName = r.Name,
+                    IsSelected = userRoles.Contains(r.Name) // ustaw true jeśli użytkownik ma tę rolę
+                }).ToList()
+            };
+
+            return View(model);
         }
 
-        // POST: Users/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, ApplicationUser  user)
+        public async Task<IActionResult> Edit(EditUserViewModel model)
         {
-            if (id != user.Id) return RedirectToAction(nameof(Index));
-
             if (!ModelState.IsValid)
-                return View(user);
+                return View(model);
 
-            try
+            var user = await _userManager.FindByIdAsync(model.Id.ToString());
+            if (user == null)
+                return NotFound();
+
+            // Aktualizuj podstawowe dane użytkownika
+            user.Nickname = model.Nickname;
+            user.Email = model.Email;
+            user.UserName = model.Email;
+
+            var updateResult = await _userManager.UpdateAsync(user);
+            if (!updateResult.Succeeded)
             {
-                _context.Update(user);
-                await _context.SaveChangesAsync();
+                foreach (var error in updateResult.Errors)
+                    ModelState.AddModelError(string.Empty, error.Description);
+                return View(model);
             }
-            catch (DbUpdateConcurrencyException)
+
+            // Pobierz wszystkie role z bazy
+            var allRoles = await _roleManager.Roles.ToListAsync();
+
+            // Wyciągnij nazwy ról, które zostały zaznaczone w formularzu (na podstawie ID)
+            var selectedRoleNames = allRoles
+                .Where(r => model.SelectedRoleIds.Contains(r.Id))
+                .Select(r => r.Name)
+                .ToList();
+
+            // Pobierz aktualne role użytkownika
+            var currentRoles = await _userManager.GetRolesAsync(user);
+
+            // Oblicz które role trzeba dodać, a które usunąć
+            var rolesToAdd = selectedRoleNames.Except(currentRoles);
+            var rolesToRemove = currentRoles.Except(selectedRoleNames);
+
+            // Dodaj nowe role
+            if (rolesToAdd.Any())
             {
-                if (!await _context.Users.AnyAsync(e => e.Id == id))
-                    return NotFound();
-                else
-                    throw;
+                var addResult = await _userManager.AddToRolesAsync(user, rolesToAdd);
+                if (!addResult.Succeeded)
+                {
+                    foreach (var error in addResult.Errors)
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    return View(model);
+                }
+            }
+
+            // Usuń niepotrzebne role
+            if (rolesToRemove.Any())
+            {
+                var removeResult = await _userManager.RemoveFromRolesAsync(user, rolesToRemove);
+                if (!removeResult.Succeeded)
+                {
+                    foreach (var error in removeResult.Errors)
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    return View(model);
+                }
             }
 
             return RedirectToAction(nameof(Index));
         }
+
 
         // POST: Users/DeleteConfirmed/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var user = await _context.Users.FindAsync(id);
+            var user = await _userManager.FindByIdAsync(id);
             if (user == null) return RedirectToAction(nameof(Index));
 
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
+            var result = await _userManager.DeleteAsync(user);
+            if (!result.Succeeded)
+            {
+                // Obsłuż błąd usuwania jeśli chcesz
+            }
+
             return RedirectToAction(nameof(Index));
         }
     }
