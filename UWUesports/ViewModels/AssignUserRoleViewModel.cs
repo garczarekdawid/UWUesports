@@ -1,6 +1,7 @@
 ﻿using UWUesports.Web.Models;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Identity;
 
 namespace UWUesports.Web.ViewModels
 {
@@ -22,16 +23,16 @@ namespace UWUesports.Web.ViewModels
         public List<Organization> Organizations { get; set; }
 
         [BindNever]
-        public List<Role> Roles { get; set; }
+        public List<IdentityRole<int>> Roles { get; set; }
 
         [BindNever]
-        public List<User> Users { get; set; }
+        public List<ApplicationUser > Users { get; set; }
 
         public AssignUserRoleViewModel()
         {
             Organizations = new List<Organization>();
-            Roles = new List<Role>();
-            Users = new List<User>();
+            Roles = new List<IdentityRole<int>>();
+            Users = new List<ApplicationUser>();
         }
     }
 }

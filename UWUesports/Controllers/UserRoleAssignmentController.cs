@@ -43,7 +43,7 @@ namespace UWUesports.Web.Controllers
                         .Select(tp => tp.User)
                         .Distinct()
                         .ToList()
-                    : new List<User>(),
+                    : new List<ApplicationUser >(),
                 OrganizationId = organizationId ?? 0
             };
 
@@ -66,7 +66,7 @@ namespace UWUesports.Web.Controllers
                         .Select(tp => tp.User)
                         .Distinct()
                         .ToList()
-                    : new List<User>();
+                    : new List<ApplicationUser >();
 
                 return View(model);
             }
@@ -113,7 +113,7 @@ namespace UWUesports.Web.Controllers
             }
             else
             {
-                model.Users = new List<User>();
+                model.Users = new List<ApplicationUser >();
             }
 
             return View(model);
@@ -171,7 +171,7 @@ namespace UWUesports.Web.Controllers
                         .Select(tp => tp.User)
                         .Distinct()
                         .ToList()
-                    : new List<User>();
+                    : new List<ApplicationUser >();
 
                 return View(model);
             }

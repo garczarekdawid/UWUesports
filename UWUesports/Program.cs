@@ -1,47 +1,53 @@
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using UWUesports.Web.Models;
 using UWUesports.Web.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
-namespace UWUesports
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
+
+builder.Services.AddDbContext<UWUesportDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("uwuesports_db")));
+
+
+// Dodaj Identity z w�asnym userem i rol� int:
+builder.Services.AddIdentity<ApplicationUser, IdentityRole<int>>(options =>
 {
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
+    // Konfiguracja opcji np. has�o, login itp.
+    options.User.RequireUniqueEmail = true; // wymuszamy unikalny email
+    options.SignIn.RequireConfirmedEmail = false; // mo�esz wymaga� potwierdzenia emaila
+})
+.AddEntityFrameworkStores<UWUesportDbContext>()
+.AddDefaultTokenProviders();
 
-            // Add services to the container.
-            builder.Services.AddControllersWithViews();
+builder.Services.AddTransient<IEmailSender, DummyEmailSender>();
 
-            builder.Services.AddDbContext<UWUesportDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("uwuesports_db")));
+var app = builder.Build();
 
-
-
-            var app = builder.Build();
-
-            // Configure the HTTP request pipeline.
-            if (!app.Environment.IsDevelopment())
-            {
-                app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
-            }
-
-            app.UseHttpsRedirection();
-            app.UseStaticFiles();
-
-            app.UseRouting();
-
-            app.UseAuthorization();
-
-            app.MapControllerRoute(
-                name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
-
-
-            //wygrawam dane do bazy danych
-            DataSeeder.SeedDatabase(app);
-
-            app.Run();
-        }
-    }
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
 }
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.UseRouting();
+
+// Dodaj uwierzytelnianie i autoryzacj�
+app.UseAuthentication();  // <-- TU WA�NE: przed UseAuthorization
+app.UseAuthorization();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapRazorPages(); // <-- dodaj
+
+//DataSeeder.SeedDatabase(app);
+
+app.Run();

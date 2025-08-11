@@ -23,7 +23,7 @@ namespace UWUesports.Web.Data
                 }
 
                 // === 1. Role ===
-                var roles = new List<Role>
+                /*var roles = new List<Role>
                 {
                     new Role { Name = "Admin" },
                     new Role { Name = "Coach" },
@@ -31,7 +31,7 @@ namespace UWUesports.Web.Data
                     new Role { Name = "Player" }
                 };
                 context.Roles.AddRange(roles);
-                context.SaveChanges();
+                context.SaveChanges();*/
 
                 // === 2. Organizacje ===
                 var organizations = new List<Organization>
@@ -43,18 +43,18 @@ namespace UWUesports.Web.Data
                 context.SaveChanges();
 
                 // === 3. Użytkownicy ===
-                var users = new List<User>
+                var users = new List<ApplicationUser >
                 {
-                    new User { Nickname = "PogChamp", Email = "pogchamp@example.com" },
-                    new User { Nickname = "UwUCat", Email = "uwucat@example.com" },
-                    new User { Nickname = "AimMaster", Email = "aimmaster@example.com" },
-                    new User { Nickname = "ProGamer", Email = "progamer@example.com" }
+                    new ApplicationUser  { Nickname = "PogChamp", Email = "pogchamp@example.com" },
+                    new ApplicationUser  { Nickname = "UwUCat", Email = "uwucat@example.com" },
+                    new ApplicationUser  { Nickname = "AimMaster", Email = "aimmaster@example.com" },
+                    new ApplicationUser  { Nickname = "ProGamer", Email = "progamer@example.com" }
                 };
                 context.Users.AddRange(users);
                 context.SaveChanges();
 
                 // === 4. Role w organizacji ===
-                var roleAssignments = new List<UserRoleAssignment>
+                /*var roleAssignments = new List<UserRoleAssignment>
                 {
                     new UserRoleAssignment { UserId = users[0].Id, OrganizationId = organizations[0].Id, RoleId = roles.Single(r => r.Name == "Player").Id },
                     new UserRoleAssignment { UserId = users[1].Id, OrganizationId = organizations[0].Id, RoleId = roles.Single(r => r.Name == "Coach").Id },
@@ -63,7 +63,7 @@ namespace UWUesports.Web.Data
                 };
                 context.UserRoleAssignments.AddRange(roleAssignments);
                 context.SaveChanges();
-
+                */
                 // === 5. Drużyny ===
                 var teams = new List<Team>
                 {

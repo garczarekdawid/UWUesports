@@ -1,17 +1,26 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using UWUesports.Web.Models;
 
 namespace UWUesports.Web.Data
 {
-    public class UWUesportDbContext : DbContext
+    public class UWUesportDbContext : IdentityDbContext<ApplicationUser, IdentityRole<int>, int>
     {
-        public UWUesportDbContext(DbContextOptions<UWUesportDbContext> options): base(options) { }
+        public UWUesportDbContext(DbContextOptions<UWUesportDbContext> options)
+            : base(options) { }
 
         public DbSet<Team> Teams { get; set; }
-        public DbSet<User> Users { get; set; }
+        // Usuń DbSet<User> Users, bo masz ApplicationUser jako użytkownika Identity
         public DbSet<Membership> TeamPlayers { get; set; }
         public DbSet<Organization> Organizations { get; set; }
-        public DbSet<Role> Roles { get; set; }
+
+        // Możesz usunąć swój Role DbSet jeśli chcesz używać IdentityRole<int> albo zostawić jeśli masz własne rozszerzenia
+        // Jeśli korzystasz z IdentityRole<int>, nie trzeba mieć osobnej tabeli Role
+        // public DbSet<Role> Roles { get; set; }
+
+        public DbSet<IdentityRole<int>> Roles { get; set; }
+
         public DbSet<UserRoleAssignment> UserRoleAssignments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -19,7 +28,7 @@ namespace UWUesports.Web.Data
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<Membership>()
-                .HasKey(tp => new { tp.TeamId, tp.UserId  });
+                .HasKey(tp => new { tp.TeamId, tp.UserId });
 
             modelBuilder.Entity<Membership>()
                 .HasOne(tp => tp.Team)
@@ -29,7 +38,7 @@ namespace UWUesports.Web.Data
             modelBuilder.Entity<Membership>()
                 .HasOne(tp => tp.User)
                 .WithMany(p => p.TeamPlayers)
-                .HasForeignKey(tp => tp.UserId );
+                .HasForeignKey(tp => tp.UserId);
 
             modelBuilder.Entity<Organization>()
                 .HasMany(o => o.Teams)
@@ -58,7 +67,7 @@ namespace UWUesports.Web.Data
 
             modelBuilder.Entity<UserRoleAssignment>()
                 .HasOne(ura => ura.Role)
-                .WithMany(r => r.UserRoles)
+                .WithMany()
                 .HasForeignKey(ura => ura.RoleId);
         }
     }

@@ -35,7 +35,7 @@ namespace UWUesports.Web.Controllers
                 ViewData["searchEmail"] = searchEmail;
             }
 
-            var paginated = await PaginatedList<User>.CreateAsync(query.AsNoTracking(), page, pageSize);
+            var paginated = await PaginatedList<ApplicationUser >.CreateAsync(query.AsNoTracking(), page, pageSize);
 
             ViewData["AllowedPageSizes"] = new[] {5, 10, 25, 50, 100 }; // <== tu to dodajesz
 
@@ -51,7 +51,7 @@ namespace UWUesports.Web.Controllers
         // POST: Users/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(User user)
+        public async Task<IActionResult> Create(ApplicationUser  user)
         {
             if (!ModelState.IsValid)
                 return View(user);
@@ -82,7 +82,7 @@ namespace UWUesports.Web.Controllers
         // POST: Users/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, User user)
+        public async Task<IActionResult> Edit(int id, ApplicationUser  user)
         {
             if (id != user.Id) return RedirectToAction(nameof(Index));
 
