@@ -21,6 +21,7 @@
             <th>Nick</th>
             <th>Email</th>
             <th>Role</th>
+            <th>Role globlane</th>
             <th>Drużyny</th>
             <th>Akcje</th>
         </tr>
@@ -44,6 +45,16 @@
                     else
                     {
                         <span>Brak przypisanych ról</span>
+                    }
+                </td>
+                <td>
+                    @if (user.GlobalRoles != null && user.GlobalRoles.Any())
+                    {
+                        <span>@string.Join(", ", user.GlobalRoles)</span>
+                    }
+                    else
+                    {
+                        <span>Brak ról globalnych</span>
                     }
                 </td>
                 <td>

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using UWUesports.Web.ViewModels;
 
@@ -15,10 +16,25 @@ namespace UWUesports.Web.Controllers
         }
 
         // GET: Roles
-        public IActionResult Index()
+        public async Task<IActionResult> Index(string? searchName, int page = 1, int pageSize = 10)
         {
-            var roles = _roleManager.Roles;
-            return View(roles);
+            var rolesQuery = _roleManager.Roles.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(searchName))
+            {
+                rolesQuery = rolesQuery.Where(r => r.Name.Contains(searchName));
+                ViewData["searchName"] = searchName;
+            }
+
+            var paginatedRoles = await PaginatedList<IdentityRole<int>>.CreateAsync(
+                rolesQuery.AsNoTracking(),
+                page,
+                pageSize
+            );
+
+            ViewData["AllowedPageSizes"] = new[] { 5, 10, 25, 50, 100 };
+
+            return View(paginatedRoles);
         }
 
         // GET: Roles/Details/5

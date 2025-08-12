@@ -1,34 +1,106 @@
-﻿@model IEnumerable<Microsoft.AspNetCore.Identity.IdentityRole<int>>
+﻿@model UWUesports.Web.ViewModels.PaginatedList<Microsoft.AspNetCore.Identity.IdentityRole<int>>
+
 @{
-    ViewData["Title"] = "Roles List";
+    ViewData["Title"] = "Lista ról";
 }
 
-<h2>Roles</h2>
+<h2>Lista ról</h2>
 
-<p>
-    <a class="btn btn-primary" asp-action="Create">Create New Role</a>
-</p>
+<a asp-action="Create" class="btn btn-success mb-3">+ Dodaj rolę</a>
 
-<table class="table table-striped">
+<div>
+    <form method="get" asp-action="Index" id="searchForm" class="mb-3 d-flex align-items-center gap-2" style="max-width: 600px;">
+        <input type="text" name="searchName" placeholder="Szukaj po nazwie"
+               value="@ViewData["searchName"]" class="form-control" />
+    </form>
+</div>
+
+<table class="table table-bordered table-striped">
     <thead>
         <tr>
             <th>Id</th>
-            <th>Name</th>
-            <th></th>
+            <th>Nazwa</th>
+            <th>Akcje</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var role in Model)
+        @foreach (var role in Model.Items)
         {
             <tr>
                 <td>@role.Id</td>
                 <td>@role.Name</td>
                 <td>
-                    <a asp-action="Details" asp-route-id="@role.Id">Details</a> |
-                    <a asp-action="Edit" asp-route-id="@role.Id">Edit</a> |
-                    <a asp-action="Delete" asp-route-id="@role.Id">Delete</a>
+                    <a asp-action="Details" asp-route-id="@role.Id" class="btn btn-info btn-sm">Szczegóły</a>
+                    <a asp-action="Edit" asp-route-id="@role.Id" class="btn btn-warning btn-sm">Edytuj</a>
+                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal-@role.Id">
+                        Usuń
+                    </button>
+
+                    <div class="modal fade" id="deleteModal-@role.Id" tabindex="-1" aria-labelledby="deleteModalLabel-@role.Id" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="deleteModalLabel-@role.Id">Potwierdź usunięcie</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Czy na pewno chcesz usunąć rolę <strong>@role.Name</strong>?
+                                </div>
+                                <div class="modal-footer">
+                                    <form asp-action="DeleteConfirmed" asp-route-id="@role.Id" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                                        <button type="submit" class="btn btn-danger">Usuń</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
+@{
+    int currentPage = Model.PageNumber;
+    int totalPages = Model.TotalPages;
+    int pageSize = Model.PageSize;
+    int[] allowedPageSizes = (int[])ViewData["AllowedPageSizes"];
+}
+
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center align-items-center">
+        <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+            <a class="page-link" asp-action="Index" asp-route-page="@(currentPage - 1)" asp-route-pageSize="@pageSize">&lt; Poprzednia</a>
+        </li>
+        <li class="page-item disabled">
+            <span class="page-link">
+                Strona @currentPage z @totalPages
+            </span>
+        </li>
+        <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+            <a class="page-link" asp-action="Index" asp-route-page="@(currentPage + 1)" asp-route-pageSize="@pageSize">&gt; Następna</a>
+        </li>
+        <li class="page-item ms-3">
+            <form method="get" asp-action="Index" class="d-flex align-items-center">
+                <label for="pageInput" class="me-2 mb-0">Przejdź do strony:</label>
+                <input type="number" min="1" max="@totalPages" value="@currentPage" name="page" id="pageInput" class="form-control form-control-sm me-2" style="width: 70px;" />
+                <input type="hidden" name="pageSize" value="@pageSize" />
+                <button type="submit" class="btn btn-primary btn-sm">Idź</button>
+            </form>
+        </li>
+        <li class="page-item ms-3">
+            <form method="get" asp-action="Index" class="d-flex align-items-center">
+                <label for="pageSizeSelect" class="me-2 mb-0">Liczba wierszy na stronie:</label>
+                <select name="pageSize" id="pageSizeSelect" class="form-select form-select-sm" onchange="this.form.submit()">
+                    @foreach (var size in allowedPageSizes)
+                    {
+                        <option value="@size" selected="@(size == pageSize ? "selected" : null)">@size</option>
+                    }
+                </select>
+                <input type="hidden" name="page" value="1" />
+            </form>
+        </li>
+    </ul>
+</nav>

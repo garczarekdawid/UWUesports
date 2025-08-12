@@ -21,7 +21,6 @@ namespace UWUesports.Web.Controllers
 
         public async Task<IActionResult> Index(string? searchNickname, string? searchEmail, int page = 1, int pageSize = 10)
         {
-            // Pobierz wszystkich użytkowników wraz z RoleAssignments i TeamPlayers
             var usersQuery = _userManager.Users
                 .Include(u => u.RoleAssignments)
                     .ThenInclude(ra => ra.Role)
@@ -44,12 +43,20 @@ namespace UWUesports.Web.Controllers
                 ViewData["searchEmail"] = searchEmail;
             }
 
-            var paginatedUsers = await PaginatedList<ApplicationUser>.CreateAsync(usersQuery.AsNoTracking(), page, pageSize);
+            var paginatedUsers = await PaginatedList<ApplicationUser>.CreateAsync(
+                usersQuery.AsNoTracking(), page, pageSize
+            );
+
+            foreach (var user in paginatedUsers.Items)
+            {
+                user.GlobalRoles = (await _userManager.GetRolesAsync(user)).ToList();
+            }
 
             ViewData["AllowedPageSizes"] = new[] { 5, 10, 25, 50, 100 };
 
             return View(paginatedUsers);
         }
+
 
         // GET: Users/Create
         public IActionResult Create()
@@ -79,6 +86,7 @@ namespace UWUesports.Web.Controllers
                 UserName = model.Email
             };
 
+
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
             {
@@ -86,6 +94,8 @@ namespace UWUesports.Web.Controllers
                     ModelState.AddModelError(string.Empty, error.Description);
                 return View(model);
             }
+
+            await _userManager.AddToRoleAsync(user, "USER");
 
             return RedirectToAction(nameof(Index));
         }
