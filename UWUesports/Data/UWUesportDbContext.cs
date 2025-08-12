@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using UWUesports.Web.Models;
+using UWUesports.Web.Models.Domain;
 
 namespace UWUesports.Web.Data
 {
@@ -22,6 +23,7 @@ namespace UWUesports.Web.Data
         public DbSet<IdentityRole<int>> Roles { get; set; }
 
         public DbSet<UserRoleAssignment> UserRoleAssignments { get; set; }
+        public DbSet<OrganizationRole> OrganizationRoles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

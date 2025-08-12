@@ -1,4 +1,4 @@
-﻿namespace UWUesports.Web.Models
+﻿namespace UWUesports.Web.Models.Domain
 {
     public class OrganizationRole
     {
@@ -10,6 +10,5 @@
 
         // Właściwość nawigacyjna
         public Organization Organization { get; set; }
-
     }
 }
