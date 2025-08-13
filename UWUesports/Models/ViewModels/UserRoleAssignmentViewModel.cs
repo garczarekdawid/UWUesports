@@ -3,9 +3,9 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Identity;
 
-namespace UWUesports.Web.ViewModels
+namespace UWUesports.Web.Models.ViewModels
 {
-    public class AssignUserRoleViewModel
+    public class UserRoleAssignmentViewModel
     {
         [Required(ErrorMessage = "Użytkownik jest wymagany")]
         [Display(Name = "Użytkownik")]
@@ -26,9 +26,9 @@ namespace UWUesports.Web.ViewModels
         public List<IdentityRole<int>> Roles { get; set; }
 
         [BindNever]
-        public List<ApplicationUser > Users { get; set; }
+        public List<ApplicationUser> Users { get; set; }
 
-        public AssignUserRoleViewModel()
+        public UserRoleAssignmentViewModel()
         {
             Organizations = new List<Organization>();
             Roles = new List<IdentityRole<int>>();

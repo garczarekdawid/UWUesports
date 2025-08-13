@@ -1,26 +1,18 @@
-﻿@model IEnumerable<UWUesports.Web.Models.UserRoleAssignment>
+﻿@model UWUesports.Web.ViewModels.PaginatedList<UWUesports.Web.Models.UserRoleAssignment>
 
-@{
-    ViewData["Title"] = "Przypisania ról";
-}
+<h2>Przypisania ról</h2>
 
-<h2>@ViewData["Title"]</h2>
-
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success">@TempData["Success"]</div>
-}
-
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger">@TempData["Error"]</div>
-}
+<form method="get" class="mb-3 d-flex gap-2" style="max-width: 600px;">
+    <input type="text" name="search" placeholder="Szukaj..."
+           value="@ViewData["search"]" class="form-control"
+           onchange="this.form.submit()" />
+</form>
 
 <p>
     <a asp-action="Create" class="btn btn-primary">Nowe przypisanie</a>
 </p>
 
-<table class="table">
+<table class="table table-bordered table-striped">
     <thead>
         <tr>
             <th>Użytkownik</th>
@@ -30,7 +22,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var item in Model.Items)
         {
             <tr>
                 <td>@item.User.Nickname</td>
@@ -42,17 +34,90 @@
                        asp-route-organizationId="@item.OrganizationId"
                        asp-route-roleId="@item.RoleId"
                        class="btn btn-sm btn-warning">Edytuj</a>
-                    <form asp-action="Delete" method="post" style="display:inline">
-                        <input type="hidden" name="userId" value="@item.UserId" />
-                        <input type="hidden" name="organizationId" value="@item.OrganizationId" />
-                        <input type="hidden" name="roleId" value="@item.RoleId" />
-                        <button type="submit" class="btn btn-sm btn-danger"
-                                onclick="return confirm('Czy na pewno chcesz usunąć to przypisanie?')">
-                            Usuń
-                        </button>
-                    </form>
+
+                    <button type="button" class="btn btn-sm btn-danger"
+                            data-bs-toggle="modal"
+                            data-bs-target="#deleteModal-@item.UserId-@item.OrganizationId-@item.RoleId">
+                        Usuń
+                    </button>
+
+                    <div class="modal fade" id="deleteModal-@item.UserId-@item.OrganizationId-@item.RoleId" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Potwierdź usunięcie</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Czy na pewno chcesz usunąć przypisanie roli <strong>@item.Role.Name</strong>
+                                    dla użytkownika <strong>@item.User.Nickname</strong>
+                                    w organizacji <strong>@item.Organization.Name</strong>?
+                                </div>
+                                <div class="modal-footer">
+                                    <form asp-action="DeleteConfirmed" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="userId" value="@item.UserId" />
+                                        <input type="hidden" name="organizationId" value="@item.OrganizationId" />
+                                        <input type="hidden" name="roleId" value="@item.RoleId" />
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                                        <button type="submit" class="btn btn-danger">Usuń</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
+@* Paginacja *@
+@{
+    int currentPage = Model.PageNumber;
+    int totalPages = Model.TotalPages;
+    int pageSize = Model.PageSize;
+    int[] allowedPageSizes = (int[])ViewData["AllowedPageSizes"];
+}
+
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center align-items-center">
+
+        <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+            <a class="page-link" asp-action="Index" asp-route-page="@(currentPage - 1)" asp-route-pageSize="@pageSize" asp-route-search="@ViewData["search"]">&lt; Poprzednia</a>
+        </li>
+
+        <li class="page-item disabled">
+            <span class="page-link">Strona @currentPage z @totalPages</span>
+        </li>
+
+        <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+            <a class="page-link" asp-action="Index" asp-route-page="@(currentPage + 1)" asp-route-pageSize="@pageSize" asp-route-search="@ViewData["search"]">Następna &gt;</a>
+        </li>
+
+        <li class="page-item ms-3">
+            <form method="get" class="d-flex align-items-center">
+                <label for="pageInput" class="me-2 mb-0">Przejdź do strony:</label>
+                <input type="number" min="1" max="@totalPages" value="@currentPage" name="page" id="pageInput" class="form-control form-control-sm me-2" style="width: 70px;" />
+                <input type="hidden" name="pageSize" value="@pageSize" />
+                <input type="hidden" name="search" value="@ViewData["search"]" />
+                <button type="submit" class="btn btn-primary btn-sm">Idź</button>
+            </form>
+        </li>
+
+        <li class="page-item ms-3">
+            <form method="get" class="d-flex align-items-center">
+                <label for="pageSizeSelect" class="me-2 mb-0">Liczba wierszy na stronie:</label>
+                <select name="pageSize" id="pageSizeSelect" class="form-select form-select-sm" onchange="this.form.submit()">
+                    @foreach (var size in allowedPageSizes)
+                    {
+                        <option value="@size" selected="@(size == pageSize ? "selected" : null)">@size</option>
+                    }
+                </select>
+                <input type="hidden" name="page" value="1" />
+                <input type="hidden" name="search" value="@ViewData["search"]" />
+            </form>
+        </li>
+    </ul>
+</nav>

@@ -7,6 +7,7 @@ using UWUesports.Web.Services.Interfaces;
 using UWUesports.Web.Models.Domain;
 using UWUesports.Web.Services;
 using UWUesports.Web.Repositories;
+using UWUesports.Web.Repositories.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,8 +29,13 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole<int>>(options =>
 .AddDefaultTokenProviders();
 
 builder.Services.AddTransient<IEmailSender, DummyEmailSender>();
+
 builder.Services.AddScoped<IOrganizationRoleRepository, OrganizationRoleRepository>();
 builder.Services.AddScoped<IOrganizationRoleService, OrganizationRoleService>();
+
+
+builder.Services.AddScoped<IUserRoleAssignmentRepository, UserRoleAssignmentRepository>();
+builder.Services.AddScoped<IUserRoleAssignmentService, UserRoleAssignmentService>();
 
 var app = builder.Build();
 

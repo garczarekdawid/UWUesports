@@ -14,8 +14,7 @@ namespace UWUesports.Web.Controllers
         {
             _organizationRoleService = organizationRoleService;
         }
-
-        // GET: OrganizationRole
+  
         public async Task<IActionResult> Index(string searchName = "", int page = 1, int pageSize = 5)
         {
             int[] allowedPageSizes = new[] { 5, 10, 20, 50, 100 };
