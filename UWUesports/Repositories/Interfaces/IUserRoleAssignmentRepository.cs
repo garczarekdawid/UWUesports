@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using UWUesports.Web.Models;
+using UWUesports.Web.Models.Domain;
 
 namespace UWUesports.Web.Repositories.Interfaces
 {
@@ -21,9 +22,12 @@ namespace UWUesports.Web.Repositories.Interfaces
         // Pobranie organizacji / ról / użytkowników
         List<Organization> GetOrganizations();
         List<IdentityRole<int>> GetRoles();
-        List<ApplicationUser> GetUsersByOrganization(int organizationId);
+        List<OrganizationRole> GetRolesByOrganization(int organizationId);
 
         // Ogólny zapis zmian, jeśli potrzebny
         Task SaveChangesAsync();
+
+        Task<List<ApplicationUser>> GetUsersByOrganizationAsync(int organizationId);
+        Task<List<OrganizationRole>> GetRolesByOrganizationAsync(int organizationId);
     }
 }

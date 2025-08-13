@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using UWUesports.Web.Models;
+using UWUesports.Web.Models.Domain;
 using UWUesports.Web.Models.ViewModels;
 using UWUesports.Web.Repositories.Interfaces;
 using UWUesports.Web.Services.Interfaces;
@@ -21,15 +22,21 @@ namespace UWUesports.Web.Services
             return await _userRoleAssignmentRepository.GetAllAssignmentsQuery().ToListAsync();
         }
 
-        public UserRoleAssignmentViewModel PrepareCreateViewModel(int? organizationId)
+        public async Task<UserRoleAssignmentViewModel> PrepareCreateViewModelAsync(int? organizationId)
         {
+            var users = organizationId.HasValue && organizationId != 0
+                ? await _userRoleAssignmentRepository.GetUsersByOrganizationAsync(organizationId.Value)
+                : new List<ApplicationUser>();
+
+            var roles = organizationId.HasValue && organizationId != 0
+                ? await _userRoleAssignmentRepository.GetRolesByOrganizationAsync(organizationId.Value)
+                : new List<OrganizationRole>();
+
             return new UserRoleAssignmentViewModel
             {
                 Organizations = _userRoleAssignmentRepository.GetOrganizations(),
-                Roles = _userRoleAssignmentRepository.GetRoles(),
-                Users = organizationId.HasValue && organizationId != 0
-                    ? _userRoleAssignmentRepository.GetUsersByOrganization(organizationId.Value)
-                    : new List<ApplicationUser>(),
+                Roles = roles,
+                Users = users,
                 OrganizationId = organizationId ?? 0
             };
         }
@@ -57,16 +64,21 @@ namespace UWUesports.Web.Services
             var assignment = await _userRoleAssignmentRepository.GetAssignmentAsync(userId, organizationId, roleId);
             if (assignment == null) return null;
 
+            var users = await _userRoleAssignmentRepository.GetUsersByOrganizationAsync(assignment.OrganizationId);
+            var roles = await _userRoleAssignmentRepository.GetRolesByOrganizationAsync(assignment.OrganizationId);
+
+
             return new UserRoleAssignmentViewModel
             {
                 UserId = assignment.UserId,
                 OrganizationId = assignment.OrganizationId,
                 RoleId = assignment.RoleId,
                 Organizations = _userRoleAssignmentRepository.GetOrganizations(),
-                Roles = _userRoleAssignmentRepository.GetRoles(),
-                Users = _userRoleAssignmentRepository.GetUsersByOrganization(assignment.OrganizationId)
+                Roles = roles,
+                Users = users
             };
         }
+
 
         public async Task<(bool Success, string Error)> EditAssignmentAsync(
             int originalUserId, int originalOrganizationId, int originalRoleId,
@@ -121,5 +133,6 @@ namespace UWUesports.Web.Services
 
             return await PaginatedList<UserRoleAssignment>.CreateAsync(query, pageNumber, pageSize);
         }
+
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using UWUesports.Web.Models.Domain;
 
 namespace UWUesports.Web.Models
 {
@@ -11,6 +12,6 @@ namespace UWUesports.Web.Models
         public Organization Organization { get; set; }
 
         public int RoleId { get; set; }
-        public IdentityRole<int> Role { get; set; }
+        public OrganizationRole Role { get; set; }
     }
 }

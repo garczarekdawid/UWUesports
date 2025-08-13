@@ -20,7 +20,7 @@ namespace UWUesports.Web.Data
         // Jeśli korzystasz z IdentityRole<int>, nie trzeba mieć osobnej tabeli Role
         // public DbSet<Role> Roles { get; set; }
 
-        public DbSet<IdentityRole<int>> Roles { get; set; }
+        //public DbSet<IdentityRole<int>> Roles { get; set; }
 
         public DbSet<UserRoleAssignment> UserRoleAssignments { get; set; }
         public DbSet<OrganizationRole> OrganizationRoles { get; set; }
@@ -70,7 +70,8 @@ namespace UWUesports.Web.Data
             modelBuilder.Entity<UserRoleAssignment>()
                 .HasOne(ura => ura.Role)
                 .WithMany()
-                .HasForeignKey(ura => ura.RoleId);
+                .HasForeignKey(ura => ura.RoleId)
+                .OnDelete(DeleteBehavior.Cascade); // opcjonalnie
         }
     }
 }

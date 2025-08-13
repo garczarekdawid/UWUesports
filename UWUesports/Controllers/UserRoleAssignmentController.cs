@@ -33,11 +33,12 @@ namespace UWUesports.Web.Controllers
         }
 
         [HttpGet]
-        public IActionResult Create(int? organizationId)
+        public async Task<IActionResult> Create(int? organizationId)
         {
-            var vm = _userRoleAssignmentService.PrepareCreateViewModel(organizationId);
+            var vm = await _userRoleAssignmentService.PrepareCreateViewModelAsync(organizationId);
             return View(vm);
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -45,7 +46,7 @@ namespace UWUesports.Web.Controllers
         {
             if (!ModelState.IsValid)
             {
-                model = _userRoleAssignmentService.PrepareCreateViewModel(model.OrganizationId);
+                model = await _userRoleAssignmentService.PrepareCreateViewModelAsync(model.OrganizationId);
                 return View(model);
             }
 
@@ -59,6 +60,7 @@ namespace UWUesports.Web.Controllers
             TempData["Success"] = "Przypisanie roli zostało dodane.";
             return RedirectToAction(nameof(Index));
         }
+
 
         [HttpGet]
         public async Task<IActionResult> Edit(int userId, int organizationId, int roleId)
@@ -79,7 +81,7 @@ namespace UWUesports.Web.Controllers
         {
             if (!ModelState.IsValid)
             {
-                model = _userRoleAssignmentService.PrepareCreateViewModel(model.OrganizationId);
+                model = await _userRoleAssignmentService.PrepareEditViewModelAsync(originalUserId, originalOrganizationId, originalRoleId);
                 return View(model);
             }
 

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using UWUesports.Web.Data;
 
 using UWUesports.Web.Models;
+using UWUesports.Web.Models.Domain;
 using UWUesports.Web.Repositories.Interfaces;
 
 namespace UWUesports.Web.Repositories
@@ -58,13 +59,10 @@ namespace UWUesports.Web.Repositories
         // Pobranie organizacji / ról / użytkowników (synchron)
         public List<Organization> GetOrganizations() => _context.Organizations.ToList();
         public List<IdentityRole<int>> GetRoles() => _context.Roles.ToList();
-        public List<ApplicationUser> GetUsersByOrganization(int organizationId)
+        public List<OrganizationRole> GetRolesByOrganization(int organizationId)
         {
-            return _context.Teams
-                .Where(t => t.OrganizationId == organizationId)
-                .SelectMany(t => t.TeamPlayers)
-                .Select(tp => tp.User)
-                .Distinct()
+            return _context.OrganizationRoles
+                .Where(r => r.OrganizationId == organizationId)
                 .ToList();
         }
 
@@ -72,6 +70,22 @@ namespace UWUesports.Web.Repositories
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();
+        }
+        public async Task<List<ApplicationUser>> GetUsersByOrganizationAsync(int organizationId)
+        {
+            return await _context.TeamPlayers
+                .Include(m => m.Team)
+                .Where(m => m.Team.OrganizationId == organizationId)
+                .Select(m => m.User)
+                .Distinct()
+                .ToListAsync(); // <- asynchroniczne pobranie danych
+        }
+
+        public async Task<List<OrganizationRole>> GetRolesByOrganizationAsync(int organizationId)
+        {
+            return await _context.OrganizationRoles
+                .Where(r => r.OrganizationId == organizationId)
+                .ToListAsync();
         }
     }
 }
