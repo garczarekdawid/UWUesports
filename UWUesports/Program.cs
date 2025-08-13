@@ -3,6 +3,10 @@ using UWUesports.Web.Models;
 using UWUesports.Web.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using UWUesports.Web.Services.Interfaces;
+using UWUesports.Web.Models.Domain;
+using UWUesports.Web.Services;
+using UWUesports.Web.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +28,8 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole<int>>(options =>
 .AddDefaultTokenProviders();
 
 builder.Services.AddTransient<IEmailSender, DummyEmailSender>();
+builder.Services.AddScoped<IOrganizationRoleRepository, OrganizationRoleRepository>();
+builder.Services.AddScoped<IOrganizationRoleService, OrganizationRoleService>();
 
 var app = builder.Build();
 

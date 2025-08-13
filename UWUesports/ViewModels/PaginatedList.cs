@@ -21,6 +21,8 @@ namespace UWUesports.Web.ViewModels
             TotalCount = count;
             PageNumber = pageNumber;
             PageSize = pageSize;
+
+            if (TotalPages == 0) PageNumber = 1;
         }
 
         // *** TUTAJ dodaj metodę CreateAsync ***

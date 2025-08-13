@@ -1,0 +1,22 @@
+﻿@model UWUesports.Web.Models.ViewModels.OrganizationRoleEditViewModel
+
+<h1>Edit Organization Role</h1>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="form-group">
+        <label asp-for="Name"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="OrganizationId"></label>
+        <select asp-for="OrganizationId" class="form-control" asp-items="Model.Organizations"></select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>
+
+<a asp-action="Index">Back to List</a>

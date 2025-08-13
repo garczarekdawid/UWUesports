@@ -1,12 +1,17 @@
-﻿using UWUesports.Web.Models.Domain;
-using UWUesports.Web.Repositories.Interfaces;
-using UWUesports.Web.Data; // Twój DbContext
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using UWUesports.Web.Data;
+using UWUesports.Web.Models;
+using UWUesports.Web.Models.Domain;
+
+using UWUesports.Web.Services.Interfaces;
 
 namespace UWUesports.Web.Repositories
 {
     public class OrganizationRoleRepository : IOrganizationRoleRepository
     {
-
         private readonly UWUesportDbContext _context;
 
         public OrganizationRoleRepository(UWUesportDbContext context)
@@ -14,38 +19,55 @@ namespace UWUesports.Web.Repositories
             _context = context;
         }
 
-        public void Create(OrganizationRole role)
+        public IQueryable<OrganizationRole> GetAll()
         {
-            _context.OrganizationRoles.Add(role);
+            return _context.OrganizationRoles
+                  .Include(r => r.Organization)
+                  .AsQueryable();
         }
 
-        public void Delete(int id)
+        public async Task<IEnumerable<OrganizationRole>> GetAllAsync()
         {
-            var role = _context.OrganizationRoles.FirstOrDefault(r => r.Id == id);
+            return await _context.OrganizationRoles.ToListAsync();
+        }
+
+        public async Task<OrganizationRole> GetByIdAsync(int id)
+        {
+            return await _context.OrganizationRoles.FirstOrDefaultAsync(r => r.Id == id);
+        }
+
+        public async Task AddAsync(OrganizationRole role)
+        {
+            await _context.OrganizationRoles.AddAsync(role);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateAsync(OrganizationRole role)
+        {
+            _context.OrganizationRoles.Update(role);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var role = await GetByIdAsync(id);
             if (role != null)
             {
                 _context.OrganizationRoles.Remove(role);
+                await _context.SaveChangesAsync();
             }
         }
 
-        public IEnumerable<OrganizationRole> GetAll()
+        public async Task<IEnumerable<OrganizationRole>> GetAllByOrganizationAsync(int organizationId)
         {
-            return _context.OrganizationRoles.ToList();
+            return await _context.OrganizationRoles
+                                 .Where(r => r.OrganizationId == organizationId)
+                                 .ToListAsync();
         }
 
-        public OrganizationRole GetById(int id)
+        public async Task<IEnumerable<Organization>> GetAllOrganizationsAsync()
         {
-            return _context.OrganizationRoles.FirstOrDefault(r => r.Id == id);
-        }
-
-        public void Save()
-        {
-            _context.SaveChanges();
-        }
-
-        public void Update(OrganizationRole role)
-        {
-            _context.OrganizationRoles.Update(role);
+            return await _context.Organizations.ToListAsync();
         }
     }
 }
