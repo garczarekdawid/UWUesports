@@ -37,6 +37,9 @@ builder.Services.AddScoped<IOrganizationRoleService, OrganizationRoleService>();
 builder.Services.AddScoped<IUserRoleAssignmentRepository, UserRoleAssignmentRepository>();
 builder.Services.AddScoped<IUserRoleAssignmentService, UserRoleAssignmentService>();
 
+builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
+builder.Services.AddScoped<IOrganizationService, OrganizationService>();
+
 // Rejestracja serwisu użytkowników
 builder.Services.AddScoped<IUserService, UserService>();
 

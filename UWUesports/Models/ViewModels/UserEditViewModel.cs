@@ -1,8 +1,8 @@
 ﻿using UWUesports.Web.Models;
 
-namespace UWUesports.Web.ViewModels
+namespace UWUesports.Web.Models.ViewModels
 {
-    public class EditUserViewModel
+    public class UserEditViewModel
     {
         public int Id { get; set; }
         public string Nickname { get; set; }

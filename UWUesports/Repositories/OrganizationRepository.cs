@@ -1,0 +1,66 @@
+﻿using UWUesports.Web.Data;
+using UWUesports.Web.Models;
+using UWUesports.Web.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace UWUesports.Web.Repositories
+{
+    public class OrganizationRepository : IOrganizationRepository
+    {
+        private readonly UWUesportDbContext _context;
+
+        public OrganizationRepository(UWUesportDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task AddAsync(Organization organization)
+        {
+            _context.Organizations.Add(organization);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var organization = await _context.Organizations.FindAsync(id);
+            if (organization != null)
+            {
+                _context.Organizations.Remove(organization);
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public IQueryable<Organization> GetAllAsync()
+        {
+            return _context.Organizations.Include(o => o.Teams).AsQueryable();
+        }
+
+        public async Task<Organization> GetByIdAsync(int id)
+        {
+            return await _context.Organizations.Include(o => o.Teams).FirstOrDefaultAsync(o => o.Id == id);
+        }
+
+        public IQueryable<Organization> SearchByNameAsync(string name)
+        {
+            return _context.Organizations
+                .Include(o => o.Teams)
+                .Where(o => o.Name.ToLower().Contains(name.ToLower()))
+                .AsQueryable();
+        }
+
+        public async Task UpdateAsync(Organization organization)
+        {
+            _context.Organizations.Update(organization);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<bool> ExistsAsync(int id)
+        {
+            return await _context.Organizations.AnyAsync(o => o.Id == id);
+        }
+    }
+}
+

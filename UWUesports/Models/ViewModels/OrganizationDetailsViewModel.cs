@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using UWUesports.Web.Models;
 
-namespace UWUesports.Web.ViewModels
+namespace UWUesports.Web.Models.ViewModels
 {
     public class OrganizationDetailsViewModel
     {
@@ -10,6 +10,6 @@ namespace UWUesports.Web.ViewModels
         public List<Team> AvailableTeams { get; set; } = new();
 
         [Required(ErrorMessage = "Wybierz drużynę.")]
-        public int? SelectedTeamId { get; set; } // do bindowania wyboru z formularza
+        public int SelectedTeamId { get; set; } // do bindowania wyboru z formularza
     }
 }

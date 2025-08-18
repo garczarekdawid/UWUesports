@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace UWUesports.Web.ViewModels
+namespace UWUesports.Web.Models.ViewModels
 {
-    public class CreateUserViewModel
+    public class UserCreateViewModel
     {
         [Required]
         public string Nickname { get; set; }

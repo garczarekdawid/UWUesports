@@ -2,10 +2,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using UWUesports.Web.Models;
-using UWUesports.Web.ViewModels;
 using System.Linq;
 using System.Threading.Tasks;
 using UWUesports.Web.Services.Interfaces;
+using UWUesports.Web.Models.ViewModels;
 
 namespace UWUesports.Web.Controllers
 {
@@ -31,7 +31,7 @@ namespace UWUesports.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CreateUserViewModel model)
+        public async Task<IActionResult> Create(UserCreateViewModel model)
         {
             if (!ModelState.IsValid) return View(model);
 
@@ -52,7 +52,7 @@ namespace UWUesports.Web.Controllers
             var user = await _userService.GetByIdAsync(id);
             if (user == null) return RedirectToAction(nameof(Index));
 
-            var model = new EditUserViewModel
+            var model = new UserEditViewModel
             {
                 Id = user.Id,
                 Nickname = user.Nickname,
@@ -65,7 +65,7 @@ namespace UWUesports.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(EditUserViewModel model)
+        public async Task<IActionResult> Edit(UserEditViewModel model)
         {
             if (!ModelState.IsValid) return View(model);
 

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using UWUesports.Web.Models;
+using UWUesports.Web.Models.ViewModels;
 using UWUesports.Web.Services.Interfaces;
 using UWUesports.Web.ViewModels;
 
@@ -55,7 +56,7 @@ namespace UWUesports.Web.Services
 
         public Task<ApplicationUser?> GetByIdAsync(string id) => _userManager.FindByIdAsync(id);
 
-        public async Task<(bool Success, IEnumerable<string> Errors)> CreateUserAsync(CreateUserViewModel model)
+        public async Task<(bool Success, IEnumerable<string> Errors)> CreateUserAsync(UserCreateViewModel model)
         {
             var existingUser = await _userManager.FindByEmailAsync(model.Email);
             if (existingUser != null)
@@ -77,7 +78,7 @@ namespace UWUesports.Web.Services
             return (true, Enumerable.Empty<string>());
         }
 
-        public async Task<(bool Success, IEnumerable<string> Errors)> UpdateUserAsync(EditUserViewModel model)
+        public async Task<(bool Success, IEnumerable<string> Errors)> UpdateUserAsync(UserEditViewModel model)
         {
             var user = await _userManager.FindByIdAsync(model.Id.ToString());
             if (user == null) return (false, new[] { "Użytkownik nie istnieje." });
