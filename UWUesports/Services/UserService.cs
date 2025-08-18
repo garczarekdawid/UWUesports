@@ -127,12 +127,12 @@ namespace UWUesports.Web.Services
 
         public Task<List<string>> GetUserRolesAsync(ApplicationUser user) => _userManager.GetRolesAsync(user).ContinueWith(t => t.Result.ToList());
 
-        public async Task<List<RoleCheckboxViewModel>> GetAllRolesForUserAsync(ApplicationUser user)
+        public async Task<List<UserRoleCheckboxViewModel>> GetAllRolesForUserAsync(ApplicationUser user)
         {
             var allRoles = await _roleManager.Roles.ToListAsync();
             var userRoles = await _userManager.GetRolesAsync(user);
 
-            return allRoles.Select(r => new RoleCheckboxViewModel
+            return allRoles.Select(r => new UserRoleCheckboxViewModel
             {
                 RoleId = r.Id,
                 RoleName = r.Name,

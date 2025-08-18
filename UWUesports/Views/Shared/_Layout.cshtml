@@ -40,31 +40,31 @@
                         <!-- Users -->
                         <li class="nav-item">
                             <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Users" ? "active" : "")"
-                               asp-controller="Users" asp-action="Index">Użytkownicy</a>
+                               asp-controller="Users" asp-action="Index">Users</a>
                         </li>
 
                         <!-- Teams -->
                         <li class="nav-item">
                             <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Teams" ? "active" : "")"
-                               asp-controller="Teams" asp-action="Index">Drużyny</a>
+                               asp-controller="Teams" asp-action="Index">Teams</a>
                         </li>
 
                         <!-- Organization -->
                         <li class="nav-item">
                             <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Organization" ? "active" : "")"
-                               asp-controller="Organization" asp-action="Index">Organizacje</a>
+                               asp-controller="Organization" asp-action="Index">Organization</a>
                         </li>
 
                         <!-- Roles -->
                         <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Roles" ? "active" : "")"
-                               asp-controller="Roles" asp-action="Index">Global Roles</a>
+                            <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "GlobalRoles" ? "active" : "")"
+                               asp-controller="GlobalRoles" asp-action="Index">Global Roles</a>
                         </li>
 
                         <!-- User Assignment -->
                         <li class="nav-item">
                             <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "UserRoleAssignment" ? "active" : "")"
-                               asp-controller="UserRoleAssignment" asp-action="Index">User Assignment</a>
+                               asp-controller="UserRoleAssignment" asp-action="Index">User Role Assignment</a>
                         </li>
 
                         <!-- Organization Role -->

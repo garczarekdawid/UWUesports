@@ -12,6 +12,6 @@ namespace UWUesports.Web.Services.Interfaces
         Task<(bool Success, IEnumerable<string> Errors)> UpdateUserAsync(UserEditViewModel model);
         Task<bool> DeleteUserAsync(string id);
         Task<List<string>> GetUserRolesAsync(ApplicationUser user);
-        Task<List<RoleCheckboxViewModel>> GetAllRolesForUserAsync(ApplicationUser user);
+        Task<List<UserRoleCheckboxViewModel>> GetAllRolesForUserAsync(ApplicationUser user);
     }
 }
