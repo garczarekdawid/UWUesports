@@ -6,7 +6,7 @@
 
 <div>
     <form method="get" asp-action="Index" id="searchForm" class="mb-3 d-flex gap-2" style="max-width: 600px;">
-        <input type="text" name="searchName" placeholder="Szukaj po nazwie"
+        <input type="text" name="searchName" placeholder="Szukaj..."
                value="@ViewData["searchName"]" class="form-control"
                onchange="document.getElementById('searchForm').submit()" />
     </form>

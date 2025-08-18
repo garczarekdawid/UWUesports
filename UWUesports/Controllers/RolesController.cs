@@ -128,21 +128,8 @@ namespace UWUesports.Web.Controllers
             return View(role);
         }
 
-        // GET: Roles/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-                return NotFound();
-
-            var role = await _roleManager.FindByIdAsync(id.ToString());
-            if (role == null)
-                return NotFound();
-
-            return View(role);
-        }
-
         // POST: Roles/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {

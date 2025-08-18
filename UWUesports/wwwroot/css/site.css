@@ -20,3 +20,33 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+/* Ogólne style dla linków w nav */
+.navbar-nav .nav-link {
+    padding: 8px 15px;
+    border-radius: 6px;
+    margin-right: 4px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+    /* Hover */
+    .navbar-nav .nav-link:hover,
+    .navbar-nav .dropdown-item:hover {
+        background-color: #e9ecef;
+        color: #000;
+    }
+
+    /* Active */
+    .navbar-nav .nav-link.active,
+    .navbar-nav .dropdown-item.active {
+        background-color: #808080;
+        color: #fff !important;
+        font-weight: bold;
+    }
+
+/* Gdy dziecko aktywne – podœwietlamy te¿ rodzica dropdown */
+.nav-item.dropdown.active > .nav-link {
+    background-color: #808080;
+    color: #fff !important;
+    font-weight: bold;
+}

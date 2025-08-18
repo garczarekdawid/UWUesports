@@ -32,30 +32,14 @@
                 <td>
                     <a asp-action="Details" asp-route-id="@role.Id" class="btn btn-info btn-sm">Szczegóły</a>
                     <a asp-action="Edit" asp-route-id="@role.Id" class="btn btn-warning btn-sm">Edytuj</a>
-                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal-@role.Id">
+                    <button type="button"
+                            class="btn btn-danger btn-sm"
+                            data-bs-toggle="modal"
+                            data-bs-target="#deleteModal"
+                            data-role-id="@role.Id"
+                            data-role-name="@role.Name">
                         Usuń
                     </button>
-
-                    <div class="modal fade" id="deleteModal-@role.Id" tabindex="-1" aria-labelledby="deleteModalLabel-@role.Id" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="deleteModalLabel-@role.Id">Potwierdź usunięcie</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
-                                </div>
-                                <div class="modal-body">
-                                    Czy na pewno chcesz usunąć rolę <strong>@role.Name</strong>?
-                                </div>
-                                <div class="modal-footer">
-                                    <form asp-action="DeleteConfirmed" asp-route-id="@role.Id" method="post">
-                                        @Html.AntiForgeryToken()
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
-                                        <button type="submit" class="btn btn-danger">Usuń</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </td>
             </tr>
         }
@@ -104,3 +88,43 @@
         </li>
     </ul>
 </nav>
+
+<!-- Jeden wspólny modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Potwierdź usunięcie</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+            </div>
+            <div class="modal-body">
+                Czy na pewno chcesz usunąć rolę <strong id="roleName"></strong>?
+            </div>
+            <div class="modal-footer">
+                <form id="deleteForm" asp-action="DeleteConfirmed" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" id="roleId" value="" />
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                    <button type="submit" class="btn btn-danger">Usuń</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var deleteModal = document.getElementById('deleteModal');
+        deleteModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var roleId = button.getAttribute('data-role-id');
+            var roleName = button.getAttribute('data-role-name');
+
+            var roleNamePlaceholder = deleteModal.querySelector('#roleName');
+            var roleIdInput = deleteModal.querySelector('#roleId');
+
+            roleNamePlaceholder.textContent = roleName;
+            roleIdInput.value = roleId;
+        });
+    </script>
+}
