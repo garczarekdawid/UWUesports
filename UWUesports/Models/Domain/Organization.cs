@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace UWUesports.Web.Models
+namespace UWUesports.Web.Models.Domain
 {
     public class Organization
     {

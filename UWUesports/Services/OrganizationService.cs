@@ -1,25 +1,25 @@
 ﻿using UWUesports.Web.Data;
-using UWUesports.Web.Models;
 using UWUesports.Web.Repositories.Interfaces;
 using UWUesports.Web.Services.Interfaces;
-using UWUesports.Web.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UWUesports.Web.Models.ViewModels;
+using UWUesports.Web.Models.Domain;
+using UWUesports.Web.Repositories;
 
 namespace UWUesports.Web.Services
 {
     public class OrganizationService : IOrganizationService
     {
         private readonly IOrganizationRepository _repository;
-        private readonly UWUesportDbContext _context; // dla operacji na Teams
+        private readonly ITeamRepository _teamRepository;
 
-        public OrganizationService(IOrganizationRepository repository, UWUesportDbContext context)
+        public OrganizationService(IOrganizationRepository repository, ITeamRepository teamRepository)
         {
             _repository = repository;
-            _context = context;
+            _teamRepository = teamRepository;
         }
 
         public async Task CreateAsync(Organization organization)
@@ -51,7 +51,7 @@ namespace UWUesports.Web.Services
             var organization = await _repository.GetByIdAsync(id);
             if (organization == null) return null;
 
-            var availableTeams = await _context.Teams
+            var availableTeams = await _teamRepository.GetAll()
                 .Where(t => t.OrganizationId == null)
                 .ToListAsync();
 
@@ -62,24 +62,23 @@ namespace UWUesports.Web.Services
                 AvailableTeams = availableTeams
             };
         }
-
         public async Task AssignTeamAsync(int organizationId, int teamId)
         {
-            var team = await _context.Teams.FindAsync(teamId);
+            var team = await _teamRepository.GetByIdAsync(teamId);
             if (team != null)
             {
                 team.OrganizationId = organizationId;
-                await _context.SaveChangesAsync();
+                await _teamRepository.UpdateAsync(team);
             }
         }
 
         public async Task RemoveTeamAsync(int organizationId, int teamId)
         {
-            var team = await _context.Teams.FindAsync(teamId);
+            var team = await _teamRepository.GetByIdAsync(teamId);
             if (team != null && team.OrganizationId == organizationId)
             {
                 team.OrganizationId = null;
-                await _context.SaveChangesAsync();
+                await _teamRepository.UpdateAsync(team);
             }
         }
 

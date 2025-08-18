@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace UWUesports.Web.ViewModels
+namespace UWUesports.Web.Models.ViewModels
 {
     public class PaginatedList<T>
     {
@@ -25,7 +25,6 @@ namespace UWUesports.Web.ViewModels
             if (TotalPages == 0) PageNumber = 1;
         }
 
-        // *** TUTAJ dodaj metodę CreateAsync ***
         public static async Task<PaginatedList<T>> CreateAsync(IQueryable<T> source, int pageNumber, int pageSize)
         {
             var count = await source.CountAsync();

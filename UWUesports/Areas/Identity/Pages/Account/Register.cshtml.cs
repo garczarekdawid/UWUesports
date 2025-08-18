@@ -19,7 +19,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
-using UWUesports.Web.Models;
+using UWUesports.Web.Models.Domain;
 
 namespace UWUesports.Web.Areas.Identity.Pages.Account
 {

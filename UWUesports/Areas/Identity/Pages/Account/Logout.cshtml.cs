@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
-using UWUesports.Web.Models;
+using UWUesports.Web.Models.Domain;
 
 namespace UWUesports.Web.Areas.Identity.Pages.Account
 {

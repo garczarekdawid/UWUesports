@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Identity;
-using UWUesports.Web.Models;
 using UWUesports.Web.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -39,6 +38,9 @@ builder.Services.AddScoped<IUserRoleAssignmentService, UserRoleAssignmentService
 
 builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
 builder.Services.AddScoped<IOrganizationService, OrganizationService>();
+
+builder.Services.AddScoped<ITeamRepository, TeamRepository>();
+builder.Services.AddScoped<ITeamService, TeamService>();
 
 // Rejestracja serwisu użytkowników
 builder.Services.AddScoped<IUserService, UserService>();

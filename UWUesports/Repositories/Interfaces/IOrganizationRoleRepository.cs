@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using UWUesports.Web.Models;
 using UWUesports.Web.Models.Domain;
-using UWUesports.Web.ViewModels;
+
 
 namespace UWUesports.Web.Services.Interfaces
 {

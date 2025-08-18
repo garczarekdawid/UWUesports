@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Numerics;
 
-namespace UWUesports.Web.Models
+namespace UWUesports.Web.Models.Domain
 {
     public class Team
     {

@@ -25,4 +25,8 @@
     <ProjectReference Include="..\UWUesports.Domain\UWUesports.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="ViewModels\" />
+  </ItemGroup>
+
 </Project>

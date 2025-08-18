@@ -1,6 +1,5 @@
-﻿using UWUesports.Web.Models;
+﻿using UWUesports.Web.Models.Domain;
 using UWUesports.Web.Models.ViewModels;
-using UWUesports.Web.ViewModels;
 
 namespace UWUesports.Web.Services.Interfaces
 {

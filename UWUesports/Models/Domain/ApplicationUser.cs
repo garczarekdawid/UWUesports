@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
 
-namespace UWUesports.Web.Models
+namespace UWUesports.Web.Models.Domain
 {
     public class ApplicationUser : IdentityUser<int>
     {

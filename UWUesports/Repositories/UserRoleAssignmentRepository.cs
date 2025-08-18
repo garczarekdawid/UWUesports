@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using UWUesports.Web.Data;
-
-using UWUesports.Web.Models;
 using UWUesports.Web.Models.Domain;
 using UWUesports.Web.Repositories.Interfaces;
 

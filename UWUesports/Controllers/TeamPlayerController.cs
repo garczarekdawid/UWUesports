@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using UWUesports.Web.Data;
 using UWUesports.Web.Models;
-using UWUesports.Web.ViewModels;
 
 namespace UWUesports.Web.Controllers
 {

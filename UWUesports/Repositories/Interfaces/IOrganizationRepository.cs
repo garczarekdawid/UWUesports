@@ -1,4 +1,4 @@
-﻿using UWUesports.Web.Models;
+﻿using UWUesports.Web.Models.Domain;
 
 namespace UWUesports.Web.Repositories.Interfaces
 {

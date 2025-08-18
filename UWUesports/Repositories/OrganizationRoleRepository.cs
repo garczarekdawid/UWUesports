@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using UWUesports.Web.Data;
-using UWUesports.Web.Models;
 using UWUesports.Web.Models.Domain;
 
 using UWUesports.Web.Services.Interfaces;

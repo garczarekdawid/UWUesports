@@ -1,10 +1,10 @@
 ﻿using UWUesports.Web.Data;
-using UWUesports.Web.Models;
 using UWUesports.Web.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using UWUesports.Web.Models.Domain;
 
 namespace UWUesports.Web.Repositories
 {

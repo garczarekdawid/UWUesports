@@ -1,4 +1,6 @@
-﻿namespace UWUesports.Web.Models
+﻿using UWUesports.Web.Models.Domain;
+
+namespace UWUesports.Web.Models
 {
     public class Membership
     {

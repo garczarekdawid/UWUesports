@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using UWUesports.Web.Models;
+using UWUesports.Web.Models.Domain;
 
 namespace UWUesports.Web.Models.ViewModels
 {
