@@ -35,7 +35,7 @@
                 <tr>
                     <td>@player.Nickname</td>
                     <td>
-                        <form asp-action="RemovePlayer" asp-controller="TeamPlayer" method="post">
+                        <form asp-action="RemovePlayer" asp-controller="Membership" method="post">
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="playerId" value="@player.Id" />
                             <input type="hidden" name="teamId" value="@Model.Team.Id" />
@@ -57,7 +57,7 @@ else
 <h5>Dodaj gracza</h5>
 @if (Model.AvailablePlayers != null && Model.AvailablePlayers.Any())
 {
-    <form asp-action="AddPlayers" asp-controller="TeamPlayer" method="post">
+    <form asp-action="AddPlayers" asp-controller="Membership" method="post">
         <input type="hidden" name="teamId" value="@Model.Team.Id" />
         <div class="form-group">
             <label>Wybierz graczy do dodania</label>
@@ -77,6 +77,9 @@ else
     <p>Wszyscy gracze są już przypisani do tej drużyny.</p>
 }
 
+<div>
+    <a asp-action="Index" asp-controller="Teams">Wróc do porzenidej strony</a>
+</div>
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

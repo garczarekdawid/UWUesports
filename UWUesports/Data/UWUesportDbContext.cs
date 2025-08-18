@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using UWUesports.Web.Models;
 using UWUesports.Web.Models.Domain;
 
 namespace UWUesports.Web.Data
@@ -13,7 +12,7 @@ namespace UWUesports.Web.Data
 
         public DbSet<Team> Teams { get; set; }
         // Usuń DbSet<User> Users, bo masz ApplicationUser jako użytkownika Identity
-        public DbSet<Membership> TeamPlayers { get; set; }
+        public DbSet<Membership> Membership { get; set; }
         public DbSet<Organization> Organizations { get; set; }
 
         // Możesz usunąć swój Role DbSet jeśli chcesz używać IdentityRole<int> albo zostawić jeśli masz własne rozszerzenia

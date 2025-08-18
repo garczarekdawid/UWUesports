@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using UWUesports.Web.Services.Interfaces;
 using UWUesports.Web.Models.Domain;
 using UWUesports.Web.Services;
+using UWUesports.Web.Services.Interfaces;
 using UWUesports.Web.Repositories;
 using UWUesports.Web.Repositories.Interfaces;
 
@@ -41,6 +42,9 @@ builder.Services.AddScoped<IOrganizationService, OrganizationService>();
 
 builder.Services.AddScoped<ITeamRepository, TeamRepository>();
 builder.Services.AddScoped<ITeamService, TeamService>();
+
+builder.Services.AddScoped<IMembershipRepository, MembershipRepository>();
+builder.Services.AddScoped<IMembershipService, MembershipService>();
 
 // Rejestracja serwisu użytkowników
 builder.Services.AddScoped<IUserService, UserService>();

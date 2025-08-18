@@ -71,7 +71,7 @@ namespace UWUesports.Web.Repositories
         }
         public async Task<List<ApplicationUser>> GetUsersByOrganizationAsync(int organizationId)
         {
-            return await _context.TeamPlayers
+            return await _context.Membership
                 .Include(m => m.Team)
                 .Where(m => m.Team.OrganizationId == organizationId)
                 .Select(m => m.User)

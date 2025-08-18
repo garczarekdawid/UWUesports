@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using UWUesports.Web.Models;
 using UWUesports.Web.Models.Domain;
 
 namespace UWUesports.Web.Data
@@ -75,7 +74,7 @@ namespace UWUesports.Web.Data
                 context.Teams.AddRange(teams);
                 context.SaveChanges();
 
-                // === 6. Membership (Użytkownicy w drużynach) ===
+                // === 6. MembershipController (Użytkownicy w drużynach) ===
                 var memberships = new List<Membership>
                 {
                     new Membership { TeamId = teams[0].Id, UserId = users[0].Id },
@@ -84,7 +83,7 @@ namespace UWUesports.Web.Data
                     new Membership { TeamId = teams[1].Id, UserId = users[2].Id },
                     new Membership { TeamId = teams[2].Id, UserId = users[3].Id }
                 };
-                context.TeamPlayers.AddRange(memberships);
+                context.Membership.AddRange(memberships);
                 context.SaveChanges();
 
                 logger.LogInformation("Dane testowe zostały poprawnie dodane do bazy danych.");
