@@ -5,12 +5,9 @@
 <a asp-action="Create" class="btn btn-success mb-3">+ Dodaj Użytkownika</a>
 
 <div>
-    <form method="get" asp-action="Index" id="searchForm" class="mb-3 d-flex align-items-center gap-2" style="max-width: 600px;">
-        <input type="text" name="searchNickname" placeholder="Szukaj po nicku"
-               value="@ViewData["searchNickname"]" class="form-control"
-               onchange="document.getElementById('searchForm').submit()" />
-        <input type="text" name="searchEmail" placeholder="Szukaj po emailu"
-               value="@ViewData["searchEmail"]" class="form-control"
+    <form method="get" asp-action="Index" id="searchForm" class="mb-3 d-flex align-items-center gap-2" style="max-width: 400px;">
+        <input type="text" name="search" placeholder="Szukaj..."
+               value="@ViewData["search"]" class="form-control"
                onchange="document.getElementById('searchForm').submit()" />
     </form>
 </div>
@@ -21,7 +18,7 @@
             <th>Nick</th>
             <th>Email</th>
             <th>Role</th>
-            <th>Role globlane</th>
+            <th>Role globalne</th>
             <th>Drużyny</th>
             <th>Akcje</th>
         </tr>
@@ -113,7 +110,6 @@
 
 <nav aria-label="Page navigation">
     <ul class="pagination justify-content-center align-items-center">
-
         <li class="page-item @(currentPage == 1 ? "disabled" : "")">
             <a class="page-link" asp-action="Index" asp-route-page="@(currentPage - 1)" asp-route-pageSize="@pageSize" tabindex="-1">&lt; Poprzednia</a>
         </li>
@@ -133,6 +129,7 @@
                 <label for="pageInput" class="me-2 mb-0">Przejdź do strony:</label>
                 <input type="number" min="1" max="@totalPages" value="@currentPage" name="page" id="pageInput" class="form-control form-control-sm me-2" style="width: 70px;" />
                 <input type="hidden" name="pageSize" value="@pageSize" />
+                <input type="hidden" name="searchQuery" value="@ViewData["search"]" />
                 <button type="submit" class="btn btn-primary btn-sm">Idź</button>
             </form>
         </li>
@@ -147,6 +144,7 @@
                     }
                 </select>
                 <input type="hidden" name="page" value="1" />
+                <input type="hidden" name="searchQuery" value="@ViewData["search"]" />
             </form>
         </li>
     </ul>
@@ -154,12 +152,12 @@
 
 @section Scripts {
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+      /*  document.addEventListener('DOMContentLoaded', () => {
             let timeout;
             const form = document.getElementById('searchForm');
             if (!form) return;
 
-            const inputs = form.querySelectorAll('input[type="text"]');
+            const input = form.querySelector('input[name="search"]');
 
             // Po załadowaniu strony, ustaw fokus na pole zapisane w localStorage
             const lastFocused = localStorage.getItem('lastFocusedSearch');
@@ -167,7 +165,6 @@
                 const inputToFocus = document.querySelector(`input[name="${lastFocused}"]`);
                 if (inputToFocus) {
                     inputToFocus.focus();
-                    // ustaw kursor na koniec tekstu
                     const val = inputToFocus.value;
                     inputToFocus.value = '';
                     inputToFocus.value = val;
@@ -175,15 +172,13 @@
                 localStorage.removeItem('lastFocusedSearch');
             }
 
-            inputs.forEach(input => {
-                input.addEventListener('input', () => {
-                    clearTimeout(timeout);
-                    localStorage.setItem('lastFocusedSearch', input.name);
-                    timeout = setTimeout(() => {
-                        form.submit();
-                    }, 500);
-                });
+            input.addEventListener('input', () => {
+                clearTimeout(timeout);
+                localStorage.setItem('lastFocusedSearch', input.name);
+                timeout = setTimeout(() => {
+                    form.submit();
+                }, 500);
             });
-        });
+        });*/
     </script>
 }
