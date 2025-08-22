@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UWUesports.Web.Models.Domain;
+using UWUesports.Web.Models.ViewModels;
 
 namespace UWUesports.Web.Repositories
 {
@@ -61,6 +62,56 @@ namespace UWUesports.Web.Repositories
         {
             return await _context.Organizations.AnyAsync(o => o.Id == id);
         }
+
+        public async Task<int> GetTotalOrganizationsAsync()
+        {
+            return await _context.Organizations.CountAsync();
+        }
+
+        public async Task<List<OrganizationRoleViewModel>> GetUserOrganizationsWithRolesAsync(int userId)
+        {
+            var user = await _context.Users
+                .Include(u => u.TeamPlayers)
+                    .ThenInclude(tp => tp.Team)
+                        .ThenInclude(t => t.Organization)
+                .Include(u => u.RoleAssignments)
+                    .ThenInclude(ra => ra.Role)
+                .Include(u => u.RoleAssignments)
+                    .ThenInclude(ra => ra.Organization)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null)
+                return new List<OrganizationRoleViewModel>();
+
+            var organizationsFromTeams = user.TeamPlayers
+                .Select(tp => tp.Team.Organization!)
+                .Distinct()
+                .ToList();
+
+            var rolesInOrganizations = user.RoleAssignments
+                .Select(ra => new OrganizationRoleViewModel
+                {
+                    OrganizationId = ra.OrganizationId,
+                    OrganizationName = ra.Organization!.Name,
+                    RoleName = ra.Role!.Name
+                })
+                .ToList();
+
+            var result = organizationsFromTeams
+                .Select(org => new OrganizationRoleViewModel
+                {
+                    OrganizationId = org.Id,
+                    OrganizationName = org.Name,
+                    RoleName = rolesInOrganizations
+                        .Where(r => r.OrganizationId == org.Id)
+                        .Select(r => r.RoleName)
+                        .FirstOrDefault() ?? "No role"
+                })
+                .ToList();
+
+            return result;
+        }
+
     }
 }
 

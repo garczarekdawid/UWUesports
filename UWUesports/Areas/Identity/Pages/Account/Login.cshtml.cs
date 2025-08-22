@@ -21,11 +21,13 @@ namespace UWUesports.Web.Areas.Identity.Pages.Account
     public class LoginModel : PageModel
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<LoginModel> _logger;
 
-        public LoginModel(SignInManager<ApplicationUser> signInManager, ILogger<LoginModel> logger)
+        public LoginModel(SignInManager<ApplicationUser> signInManager, ILogger<LoginModel> logger, UserManager<ApplicationUser> userManager)
         {
             _signInManager = signInManager;
+            _userManager = userManager; // <- przypisanie do pola klasy
             _logger = logger;
         }
 
@@ -85,7 +87,7 @@ namespace UWUesports.Web.Areas.Identity.Pages.Account
             public bool RememberMe { get; set; }
         }
 
-        public async Task OnGetAsync(string returnUrl = null)
+        public async Task<IActionResult> OnGetAsync(string returnUrl = null)
         {
             if (!string.IsNullOrEmpty(ErrorMessage))
             {
@@ -94,12 +96,21 @@ namespace UWUesports.Web.Areas.Identity.Pages.Account
 
             returnUrl ??= Url.Content("~/");
 
-            // Clear the existing external cookie to ensure a clean login process
+            // Sprawdzenie, czy użytkownik jest już zalogowany
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                // jeśli tak, przekieruj np. na dashboard
+                return LocalRedirect(returnUrl);
+            }
+
+            // wylogowanie z zewnętrznych providerów, czysty start
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
             ReturnUrl = returnUrl;
+
+            return Page();
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
@@ -116,7 +127,20 @@ namespace UWUesports.Web.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User logged in.");
-                    return LocalRedirect(returnUrl);
+
+                    // Pobierz użytkownika
+                    var user = await _userManager.FindByEmailAsync(Input.Email);
+
+                    // Sprawdź role globalne
+                    if (await _userManager.IsInRoleAsync(user, "Admin"))
+                    {
+                        return LocalRedirect("~/Admin/Index");
+                    }
+                    else
+                    {
+                        // User – można od razu wybrać domyślną organizację lub przekierować do wyboru
+                        return LocalRedirect("~/User/Index");
+                    }
                 }
                 if (result.RequiresTwoFactor)
                 {

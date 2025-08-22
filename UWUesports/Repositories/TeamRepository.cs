@@ -53,5 +53,10 @@ namespace UWUesports.Web.Repositories
         {
             return await _context.Teams.AnyAsync(t => t.Name == name);
         }
+
+        public async Task<int> GetTotalTeamsAsync()
+        {
+            return await _context.Teams.CountAsync();
+        }
     }
 }

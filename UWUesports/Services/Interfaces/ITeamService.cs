@@ -13,5 +13,7 @@ namespace UWUesports.Web.Services.Interfaces
         Task<bool> TeamExistsByNameAsync(string name);
         Task<TeamDetailsViewModel?> GetTeamDetailsAsync(int id);
         Task<PaginatedList<Team>> GetPaginatedAsync(string searchName, int page, int pageSize);
+
+        Task<int> GetTotalTeamsAsync();
     }
 }

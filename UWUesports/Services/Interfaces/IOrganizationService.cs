@@ -13,5 +13,7 @@ namespace UWUesports.Web.Services.Interfaces
         Task<OrganizationDetailsViewModel> GetDetailsAsync(int id);
         Task AssignTeamAsync(int organizationId, int teamId);
         Task RemoveTeamAsync(int organizationId, int teamId);
+
+        Task<int> GetTotalOrganizationsAsync();
     }
 }

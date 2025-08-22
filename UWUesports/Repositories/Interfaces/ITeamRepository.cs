@@ -10,5 +10,6 @@ namespace UWUesports.Web.Repositories.Interfaces
         Task UpdateAsync(Team team);
         Task DeleteAsync(Team team);
         Task<bool> ExistsByNameAsync(string name);
+        Task<int> GetTotalTeamsAsync();
     }
 }

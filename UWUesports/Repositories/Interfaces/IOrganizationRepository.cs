@@ -1,4 +1,5 @@
 ﻿using UWUesports.Web.Models.Domain;
+using UWUesports.Web.Models.ViewModels;
 
 namespace UWUesports.Web.Repositories.Interfaces
 {
@@ -11,5 +12,7 @@ namespace UWUesports.Web.Repositories.Interfaces
         Task UpdateAsync(Organization organization);
         Task DeleteAsync(int id);
         Task<bool> ExistsAsync(int id);
+        Task<int> GetTotalOrganizationsAsync();
+        Task<List<OrganizationRoleViewModel>> GetUserOrganizationsWithRolesAsync(int userId);
     }
 }

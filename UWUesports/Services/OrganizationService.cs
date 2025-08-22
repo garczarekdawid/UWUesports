@@ -101,6 +101,11 @@ namespace UWUesports.Web.Services
         {
             await _repository.UpdateAsync(organization);
         }
+
+        public async Task<int> GetTotalOrganizationsAsync()
+        {
+            return await _repository.GetTotalOrganizationsAsync();
+        }
     }
 }
 

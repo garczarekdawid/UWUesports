@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using UWUesports.Web.Services.Interfaces;
 using UWUesports.Web.Models.Domain;
 using UWUesports.Web.Services;
-using UWUesports.Web.Services.Interfaces;
 using UWUesports.Web.Repositories;
 using UWUesports.Web.Repositories.Interfaces;
 
@@ -49,6 +48,12 @@ builder.Services.AddScoped<IMembershipService, MembershipService>();
 // Rejestracja serwisu użytkowników
 builder.Services.AddScoped<IUserService, UserService>();
 
+builder.Services.AddScoped<IAdminDashboardRepository, AdminDashboardRepository>();
+builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
+
+builder.Services.AddScoped<IUserDashboardRepository, UserDashboardRepository>();
+builder.Services.AddScoped<IUserDashboardService, UserDashboardService>();
+
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
@@ -68,7 +73,9 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    //pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Login}/{action=Index}/{id?}");
+
 
 app.MapRazorPages(); // <-- dodaj
 

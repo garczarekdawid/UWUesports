@@ -63,5 +63,10 @@ namespace UWUesports.Web.Services
                 AvailablePlayers = availablePlayers
             };
         }
+
+        public async Task<int> GetTotalTeamsAsync()
+        {
+            return await _teamRepository.GetTotalTeamsAsync();
+        }
     }
 }

@@ -1,0 +1,35 @@
+﻿@model UWUesports.Web.Models.ViewModels.UserDashboardViewModel
+
+<h2>Dashboard użytkownika</h2>
+
+<p>Aktualna organizacja: <strong>@Model.CurrentOrganizationName</strong></p>
+
+<p>Twoje role w organizacji:</p>
+@if (Model.CurrentUserRoles.Any())
+{
+    <ul>
+        @foreach (var role in Model.CurrentUserRoles)
+        {
+            <li>@role</li>
+        }
+    </ul>
+}
+else
+{
+    <p>Brak przypisanych ról</p>
+}
+
+<p>Drużyny w aktualnej organizacji:</p>
+@if (Model.TeamsInCurrentOrganization.Any())
+{
+    <ul>
+        @foreach (var team in Model.TeamsInCurrentOrganization)
+        {
+            <li>@team</li>
+        }
+    </ul>
+}
+else
+{
+    <p>Nie należysz do żadnej drużyny w tej organizacji</p>
+}

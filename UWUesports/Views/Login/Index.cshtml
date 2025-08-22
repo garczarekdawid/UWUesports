@@ -1,0 +1,41 @@
+﻿@model UWUesports.Web.Models.ViewModels.LoginViewModel
+
+@{
+    Layout = "_LoginLayout";
+    ViewData["Title"] = "Logowanie";
+}
+
+<h2>Logowanie</h2>
+
+<!-- Błąd globalny -->
+@if (ViewData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @ViewData["ErrorMessage"]
+    </div>
+}
+
+<form asp-action="Index" method="post">
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label">Email</label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Password" class="form-label">Hasło</label>
+        <input asp-for="Password" type="password" class="form-control" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+
+    <div class="form-check mb-3">
+        <input asp-for="RememberMe" class="form-check-input" />
+        <label asp-for="RememberMe" class="form-check-label">Zapamiętaj mnie</label>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Zaloguj</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
