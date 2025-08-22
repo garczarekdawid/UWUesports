@@ -41,31 +41,17 @@
                 <td>
                     <a asp-action="Details" asp-route-id="@team.Id" class="btn btn-sm btn-info me-1">Szczegóły</a>
                     <a asp-action="Edit" asp-route-id="@team.Id" class="btn btn-sm btn-warning me-1">Edytuj</a>
-                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-@team.Id">Usuń</button>
-
-                    <!-- Modal -->
-                    <div class="modal fade" id="deleteModal-@team.Id" tabindex="-1" aria-labelledby="deleteModalLabel-@team.Id" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="deleteModalLabel-@team.Id">Potwierdź usunięcie</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
-                                </div>
-                                <div class="modal-body">
-                                    Czy na pewno chcesz usunąć drużynę <strong>@team.Name</strong>?
-                                </div>
-                                <div class="modal-footer">
-                                    <form asp-action="DeleteConfirmed" asp-route-id="@team.Id" method="post">
-                                        @Html.AntiForgeryToken()
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
-                                        <button type="submit" class="btn btn-danger">Usuń</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <button type="button"
+                            class="btn btn-sm btn-danger"
+                            data-bs-toggle="modal"
+                            data-bs-target="#deleteModal"
+                            data-team-id="@team.Id"
+                            data-team-name="@team.Name">
+                        Usuń
+                    </button>
                 </td>
             </tr>
+        }
         }
     </tbody>
 </table>
@@ -116,6 +102,27 @@
     </ul>
 </nav>
 
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Potwierdź usunięcie</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+            </div>
+            <div class="modal-body">
+                Czy na pewno chcesz usunąć drużynę <strong id="deleteTeamName"></strong>?
+            </div>
+            <div class="modal-footer">
+                <form id="deleteForm" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                    <button type="submit" class="btn btn-danger">Usuń</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -150,5 +157,19 @@
                         });
                     });
                 });
+
+            const deleteModal = document.getElementById('deleteModal');
+            deleteModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const teamId = button.getAttribute('data-team-id');
+            const teamName = button.getAttribute('data-team-name');
+
+            // Podmiana tekstu w modalu
+            document.getElementById('deleteTeamName').textContent = teamName;
+
+            // Ustawienie adresu formularza
+            const form = document.getElementById('deleteForm');
+            form.action = `/Teams/DeleteConfirmed/${teamId}`;
+        });
     </script>
 }

@@ -15,16 +15,31 @@ namespace UWUesports.Web.Services
     {
         private readonly IOrganizationRepository _repository;
         private readonly ITeamRepository _teamRepository;
+        private readonly IOrganizationRoleRepository _roleRepository;
 
-        public OrganizationService(IOrganizationRepository repository, ITeamRepository teamRepository)
+        public OrganizationService(IOrganizationRepository repository, ITeamRepository teamRepository, IOrganizationRoleRepository roleRepository)
         {
             _repository = repository;
             _teamRepository = teamRepository;
+            _roleRepository = roleRepository;
         }
 
         public async Task CreateAsync(Organization organization)
         {
             await _repository.AddAsync(organization);
+            // Automatyczne role dla organizacji
+            // Teraz organization.Id ma prawidłową wartość
+            var defaultRoles = new List<OrganizationRole>
+            {
+                new OrganizationRole { Name = "Trainer", OrganizationId = organization.Id },
+                new OrganizationRole { Name = "Manager", OrganizationId = organization.Id },
+                new OrganizationRole { Name = "Player", OrganizationId = organization.Id }
+            };
+
+            foreach (var role in defaultRoles)
+            {
+                await _roleRepository.AddAsync(role);
+            }
         }
 
         public async Task DeleteAsync(int id)

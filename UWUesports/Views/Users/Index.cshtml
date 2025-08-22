@@ -72,30 +72,14 @@
                 </td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@user.Id" class="btn btn-sm btn-warning">Edytuj</a>
-                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal-@user.Id">
+                    <button type="button"
+                            class="btn btn-danger btn-sm"
+                            data-bs-toggle="modal"
+                            data-bs-target="#deleteModal"
+                            data-user-id="@user.Id"
+                            data-user-nickname="@user.Nickname">
                         Usuń
                     </button>
-
-                    <div class="modal fade" id="deleteModal-@user.Id" tabindex="-1" aria-labelledby="deleteModalLabel-@user.Id" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="deleteModalLabel-@user.Id">Potwierdź usunięcie</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
-                                </div>
-                                <div class="modal-body">
-                                    Czy na pewno chcesz usunąć gracza <strong>@user.Nickname</strong>?
-                                </div>
-                                <div class="modal-footer">
-                                    <form asp-action="DeleteConfirmed" asp-route-id="@user.Id" method="post">
-                                        @Html.AntiForgeryToken()
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
-                                        <button type="submit" class="btn btn-danger">Usuń</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </td>
             </tr>
         }
@@ -151,35 +135,42 @@
     </ul>
 </nav>
 
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Potwierdź usunięcie</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+            </div>
+            <div class="modal-body">
+                Czy na pewno chcesz usunąć gracza <strong id="deleteUserNickname"></strong>?
+            </div>
+            <div class="modal-footer">
+                <form id="deleteForm" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                    <button type="submit" class="btn btn-danger">Usuń</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
-      /*  document.addEventListener('DOMContentLoaded', () => {
-            let timeout;
-            const form = document.getElementById('searchForm');
-            if (!form) return;
+           const deleteModal = document.getElementById('deleteModal');
+        deleteModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget; // przycisk, który otworzył modal
+            const userId = button.getAttribute('data-user-id');
+            const nickname = button.getAttribute('data-user-nickname');
 
-            const input = form.querySelector('input[name="search"]');
+            // Ustawienie nicka w treści modala
+            const nicknamePlaceholder = deleteModal.querySelector('#deleteUserNickname');
+            nicknamePlaceholder.textContent = nickname;
 
-            // Po załadowaniu strony, ustaw fokus na pole zapisane w localStorage
-            const lastFocused = localStorage.getItem('lastFocusedSearch');
-            if (lastFocused) {
-                const inputToFocus = document.querySelector(`input[name="${lastFocused}"]`);
-                if (inputToFocus) {
-                    inputToFocus.focus();
-                    const val = inputToFocus.value;
-                    inputToFocus.value = '';
-                    inputToFocus.value = val;
-                }
-                localStorage.removeItem('lastFocusedSearch');
-            }
-
-            input.addEventListener('input', () => {
-                clearTimeout(timeout);
-                localStorage.setItem('lastFocusedSearch', input.name);
-                timeout = setTimeout(() => {
-                    form.submit();
-                }, 500);
-            });
-        });*/
+            // Ustawienie akcji formularza
+            const form = deleteModal.querySelector('#deleteForm');
+            form.action = `/Users/DeleteConfirmed/${userId}`;
+        });
     </script>
 }

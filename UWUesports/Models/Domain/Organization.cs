@@ -12,6 +12,7 @@ namespace UWUesports.Web.Models.Domain
 
         public List<Team> Teams { get; set; } = new();
         public List<UserRoleAssignment> UserRoles { get; set; } = new();
+        public ICollection<OrganizationRole> Roles { get; set; } = new List<OrganizationRole>();  // Dodaj to
 
     }
 }

@@ -70,7 +70,13 @@ namespace UWUesports.Web.Data
                 .HasOne(ura => ura.Role)
                 .WithMany()
                 .HasForeignKey(ura => ura.RoleId)
-                .OnDelete(DeleteBehavior.Cascade); // opcjonalnie
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Organization>()
+                .HasMany(o => o.Roles)
+                .WithOne(r => r.Organization)
+                .HasForeignKey(r => r.OrganizationId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
